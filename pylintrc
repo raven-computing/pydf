@@ -1,0 +1,38 @@
+[MASTER]
+init-hook='import sys; sys.path.append(".")'
+
+[MESSAGES CONTROL]
+
+# Disable cyclic import warning. Not applicable
+disable=R0401,
+        R0904,
+        no-else-return
+
+[SIMILARITIES]
+
+# Ignore comments when computing similarities.
+ignore-comments=yes
+
+# Ignore docstrings when computing similarities.
+ignore-docstrings=yes
+
+# Ignore imports when computing similarities.
+ignore-imports=yes
+
+# Minimum lines number of a similarity.
+min-similarity-lines=100
+
+[CLASSES]
+
+# List of member names, which should be excluded from the protected access warning.
+exclude-protected=_asdict,
+                  _fields,
+                  _replace,
+                  _source,
+                  _make,
+                  _name,
+                  _values,
+                  __next,
+                  __columns,
+                  __is_nullable
+

@@ -47,7 +47,7 @@ Internally, this library uses [Numpy](https://github.com/numpy/numpy) for array 
 
 ## Documentation
 
-The official unified documentation will be made available shortly.
+The unified documentation is available [here](https://www.raven-computing.com/docs/dataframe?language=python).
 
 ## Development
 

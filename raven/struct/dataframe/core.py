@@ -1,4 +1,4 @@
-# Copyright (C) 2020 Raven Computing
+# Copyright (C) 2021 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -2195,7 +2195,7 @@ class DataFrame(ABC):
                     ("Invalid arguments. Argument 'df' was "
                      "specified but other args are not None"))
 
-            return self._repace_by_datafarame(df)
+            return self._replace_by_datafarame(df)
         else:
             if col is None:
                 raise DataFrameException(
@@ -3654,7 +3654,16 @@ class DataFrame(ABC):
         if self.__next == -1:
             return None
 
-        return [col._values.tolist() for col in self.__columns]
+        self.flush()
+        tc1 = stringcolumn.StringColumn.TYPE_CODE
+        tc2 = stringcolumn.NullableStringColumn.TYPE_CODE
+        string_code = tc2 if self.__is_nullable else tc1
+        # convert char columns to strings
+        cols = [col.convert_to(string_code)
+                if col.type_name() == "char" else col
+                for col in self.__columns]
+
+        return [col.as_array().tolist() for col in cols]
 
     def to_string(self):
         """Returns a human readable string representation of this DataFrame.
@@ -4272,7 +4281,7 @@ class DataFrame(ABC):
         result.flush()
         return result
 
-    def _repace_by_datafarame(self, df):
+    def _replace_by_datafarame(self, df):
         """Replaces all Columns in this DataFrame with matched Columns
         from the specified DataFrame.
 

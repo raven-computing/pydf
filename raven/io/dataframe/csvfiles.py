@@ -1,4 +1,4 @@
-# Copyright (C) 2020 Raven Computing
+# Copyright (C) 2021 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -226,7 +226,12 @@ def _df_from_csv_format(buffer, separator, header, types):
                 blocks = pattern.split(_process(buffer[line_index], separator), 0)
                 converted = [None] * len(blocks)
                 for i, block in enumerate(blocks):
-                    converted[i] = _convert_type(types[i], _normalize(block))
+                    try:
+                        converted[i] = _convert_type(types[i], _normalize(block))
+                    except (ValueError, TypeError) as ex:
+                        raise IOError(
+                            ("Improperly formatted CSV "
+                             "file at line: {}").format(line_index + 1)) from ex
 
                 try:
                     df.add_row(converted)
@@ -300,7 +305,11 @@ def _convert_type(typename, obj):
     elif typename == "double":
         return float(obj)
     elif typename in ("char", "character"):
-        return str(obj)
+        s = str(obj)
+        if len(s) > 1:
+            raise ValueError("Invalid char value: '{}'".format(s))
+
+        return s
     elif typename in ("boolean", "bool"):
         return obj.lower() in ("true", "t", "yes", "y", "1")
     else:

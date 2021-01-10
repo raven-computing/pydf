@@ -1,4 +1,4 @@
-# Copyright (C) 2020 Raven Computing
+# Copyright (C) 2021 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -3485,6 +3485,94 @@ class TestDefaultDataFrame(unittest.TestCase):
         test1.set_byte("BYTE", 2, 42)
         self.assertFalse(test1.equals(test2), "Equals method should return false")
         self.assertFalse(test1 == test2, "DataFrames should not be equal")
+
+
+
+    #***************************************#
+    #               Utilities               #
+    #***************************************#
+
+
+
+    def test_to_array(self):
+        self.df.remove_row(4)
+        a = self.df.to_array()
+        self.assertTrue(isinstance(a, list), "Returned object should be a list")
+        col = a[0] # ByteColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, int), "Invalid column list element type")
+            self.assertTrue(self.df.get_byte(0, i) == elem, "Value does not match")
+
+        col = a[1] # ShortColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, int), "Invalid column list element type")
+            self.assertTrue(self.df.get_short(1, i) == elem, "Value does not match")
+
+        col = a[2] # IntColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, int), "Invalid column list element type")
+            self.assertTrue(self.df.get_int(2, i) == elem, "Value does not match")
+
+        col = a[3] # LongColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, int), "Invalid column list element type")
+            self.assertTrue(self.df.get_long(3, i) == elem, "Value does not match")
+
+        col = a[4] # StringColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, str), "Invalid column list element type")
+            self.assertTrue(self.df.get_string(4, i) == elem, "Value does not match")
+
+        col = a[5] # CharColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, str), "Invalid column list element type")
+            self.assertTrue(self.df.get_char(5, i) == elem, "Value does not match")
+
+        col = a[6] # FloatColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, float), "Invalid column list element type")
+            self.assertTrue(self.df.get_float(6, i) == elem, "Value does not match")
+
+        col = a[7] # DoubleColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, float), "Invalid column list element type")
+            self.assertTrue(self.df.get_double(7, i) == elem, "Value does not match")
+
+        col = a[8] # BooleanColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, bool), "Invalid column list element type")
+            self.assertTrue(self.df.get_boolean(8, i) == elem, "Value does not match")
+
+        col = a[9] # BinaryColumn
+        self.assertTrue(isinstance(col, list), "Column object should be a list")
+        self.assertTrue(len(col) == self.df.rows(), "Column list length does not match expected")
+        for i, elem in enumerate(col):
+            self.assertTrue(isinstance(elem, bytearray), "Invalid column list element type")
+            self.assertTrue(self.df.get_binary(9, i) == elem, "Value does not match")
+
+    def test_to_array_from_uninitialized(self):
+        df = DefaultDataFrame()
+        a = df.to_array()
+        self.assertTrue(a is None, "Returned value should be None")
+
 
 
 if __name__ == "__main__":

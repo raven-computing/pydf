@@ -55,7 +55,7 @@ class BinaryColumn(column.Column):
                 Must be a list or numpy array with dtype object, or an int
         """
         if values is None:
-            values = np.empty(0, dtype=np.object)
+            values = self._create_array()
 
         if isinstance(values, list):
             for value in values:
@@ -82,7 +82,7 @@ class BinaryColumn(column.Column):
                 self._check_type(value)
 
         elif isinstance(values, int):
-            values = np.empty(values, dtype=np.object)
+            values = self._create_array(size=values)
         else:
             raise dataframe.DataFrameException(
                 ("Invalid argument array. Expected "
@@ -334,7 +334,11 @@ class BinaryColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        return np.empty(size, dtype=np.object)
+        array = np.empty(size, dtype=np.object)
+        for i in range(size):
+            array[i] = self.get_default_value()
+
+        return array
 
 class NullableBinaryColumn(column.Column):
     """A Column holding nullable binary values (bytearray).
@@ -359,7 +363,7 @@ class NullableBinaryColumn(column.Column):
                 Must be a list or numpy array with dtype object, or an int
         """
         if values is None:
-            values = np.empty(0, dtype=np.object)
+            values = self._create_array()
 
         if isinstance(values, list):
             for value in values:
@@ -383,7 +387,7 @@ class NullableBinaryColumn(column.Column):
                 self._check_type(value)
 
         elif isinstance(values, int):
-            values = np.empty(values, dtype=np.object)
+            values = self._create_array(size=values)
         else:
             raise dataframe.DataFrameException(
                 ("Invalid argument array. Expected "

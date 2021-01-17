@@ -137,3 +137,7 @@ class TestCSV(unittest.TestCase):
 
         df = csv.read(TestCSV.FILE_MALFORMED, types=("int", "double", "double", "string"))
         self.assertTrue(TestCSV.DF_MALFORMED == df, "DataFrames do not match")
+
+
+if __name__ == "__main__":
+    unittest.main()

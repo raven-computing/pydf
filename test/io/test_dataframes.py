@@ -360,3 +360,7 @@ class TestDataFramesIO(unittest.TestCase):
 
         df = DataFrame.read(TestDataFramesIO.FILE_NULLABLE)
         self.assertTrue(df.equals(TestDataFramesIO.df_nullable), "DataFrames do not match")
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -229,8 +229,8 @@ class Column(ABC):
             value: The value to set at the specified position
 
         Raises:
-            ValueError: If the specified index is out of bounds or of the
-                object provided is of the wrong type
+            DataFrameException: If the specified index is out of bounds or
+                if the object provided is of the wrong type
         """
         self._check_bounds(index)
         self._check_type(value)
@@ -425,6 +425,13 @@ class Column(ABC):
     def __eq__(self, other):
         return self.equals(other)
 
+    def __getitem__(self, index):
+        return self._values[index]
+
+    def __setitem__(self, index, value):
+        self._check_type(value)
+        self._values[index] = value
+
     @staticmethod
     def like(col, length=0):
         """Creates a new Column instance which has the same type and name as
@@ -565,7 +572,7 @@ class Column(ABC):
 
         i = next_pos - 1
         for _ in range(i_to - i_from):
-            self.set_value(i, self.get_default_value())
+            self[i] = self.get_default_value()
             i -= 1
 
     def _resize(self):

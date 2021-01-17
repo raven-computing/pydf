@@ -163,6 +163,13 @@ class CharColumn(column.Column):
     def get_default_value(self):
         return CharColumn.DEFAULT_VALUE
 
+    def __getitem__(self, index):
+        return chr(self._values[index])
+
+    def __setitem__(self, index, value):
+        self._check_type(value)
+        self._values[index] = ord(value)
+
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
     # pylint: disable=invalid-name
@@ -465,6 +472,20 @@ class NullableCharColumn(column.Column):
 
     def get_default_value(self):
         return None
+
+    def __getitem__(self, index):
+        val = self._values[index]
+        if val is None:
+            return None
+        else:
+            return chr(val)
+
+    def __setitem__(self, index, value):
+        self._check_type(value)
+        if value is None:
+            self._values[index] = None
+        else:
+            self._values[index] = ord(value)
 
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements

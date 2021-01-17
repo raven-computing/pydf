@@ -640,11 +640,500 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.get_name() == "colname")
         self.assertTrue(col.capacity() == 5)
 
+    def test_construct_empty_bytecolumn(self):
+        col = ByteColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_shortcolumn(self):
+        col = ShortColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_intcolumn(self):
+        col = IntColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_longcolumn(self):
+        col = LongColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_floatcolumn(self):
+        col = FloatColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_doublecolumn(self):
+        col = DoubleColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_stringcolumn(self):
+        col = StringColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_charcolumn(self):
+        col = CharColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_booleancolumn(self):
+        col = BooleanColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_binarycolumn(self):
+        col = BinaryColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullablebytecolumn(self):
+        col = NullableByteColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullableshortcolumn(self):
+        col = NullableShortColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullableintcolumn(self):
+        col = NullableIntColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullablelongcolumn(self):
+        col = NullableLongColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullablefloatcolumn(self):
+        col = NullableFloatColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullabledoublecolumn(self):
+        col = NullableDoubleColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullablestringcolumn(self):
+        col = NullableStringColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullablecharcolumn(self):
+        col = NullableCharColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullablebooleancolumn(self):
+        col = NullableBooleanColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_empty_nullablebinarycolumn(self):
+        col = NullableBinaryColumn("colname")
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 0)
+        self.assertTrue(col.as_array() is not None)
+
+    def test_construct_length_initialized_bytecolumn(self):
+        col = ByteColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == 0)
+
+    def test_construct_length_initialized_shortcolumn(self):
+        col = ShortColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == 0)
+
+    def test_construct_length_initialized_intcolumn(self):
+        col = IntColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == 0)
+
+    def test_construct_length_initialized_longcolumn(self):
+        col = LongColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == 0)
+
+    def test_construct_length_initialized_floatcolumn(self):
+        col = FloatColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == 0.0)
+
+    def test_construct_length_initialized_doublecolumn(self):
+        col = DoubleColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == 0.0)
+
+    def test_construct_length_initialized_stringcolumn(self):
+        col = StringColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == StringColumn.DEFAULT_VALUE)
+
+    def test_construct_length_initialized_charcolumn(self):
+        col = CharColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == CharColumn.DEFAULT_VALUE)
+
+    def test_construct_length_initialized_booleancolumn(self):
+        col = BooleanColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertFalse(col[i])
+
+    def test_construct_length_initialized_binarycolumn(self):
+        col = BinaryColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] == bytearray.fromhex("00"))
+
+    def test_construct_length_initialized_nullablebytecolumn(self):
+        col = NullableByteColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullableshortcolumn(self):
+        col = NullableShortColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullableintcolumn(self):
+        col = NullableIntColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullablelongcolumn(self):
+        col = NullableLongColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullablefloatcolumn(self):
+        col = NullableFloatColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullabledoublecolumn(self):
+        col = NullableDoubleColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullablestringcolumn(self):
+        col = NullableStringColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullablecharcolumn(self):
+        col = NullableCharColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullablebooleancolumn(self):
+        col = NullableBooleanColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+    def test_construct_length_initialized_nullablebinarycolumn(self):
+        col = NullableBinaryColumn("colname", 5)
+        self.assertTrue(col.get_name() == "colname")
+        self.assertTrue(col.capacity() == 5)
+        self.assertTrue(col.as_array() is not None)
+        for i in range(5):
+            self.assertTrue(col[i] is None)
+
+
+
+    #*****************************************************#
+    #              Get / Set Item Operations              #
+    #*****************************************************#
+
+
+
+    def test_bytecolumn_get_set_item(self):
+        col = ByteColumn("colname", [11, 22, 33, 44, 55])
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 33)
+        col[2] = 42
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 42)
+
+    def test_shortcolumn_get_set_item(self):
+        col = ShortColumn("colname", [11, 22, 33, 44, 55])
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 33)
+        col[2] = 142
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 142)
+
+    def test_intcolumn_get_set_item(self):
+        col = IntColumn("colname", [11, 22, 33, 44, 55])
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 33)
+        col[2] = 142
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 142)
+
+    def test_longcolumn_get_set_item(self):
+        col = LongColumn("colname", [11, 22, 33, 44, 55])
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 33)
+        col[2] = 142
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 142)
+
+    def test_floatcolumn_get_set_item(self):
+        col = FloatColumn("colname", [11.1, 22.2, 33.0, 44.4, 55.5])
+        self.assertTrue(isinstance(float(col[2]), float))
+        self.assertTrue(col[2] == 33.0)
+        col[2] = 42.0
+        self.assertTrue(isinstance(float(col[2]), float))
+        self.assertTrue(col[2] == 42.0)
+
+    def test_doublecolumn_get_set_item(self):
+        col = DoubleColumn("colname", [11.1, 22.2, 33.3, 44.4, 55.5])
+        self.assertTrue(isinstance(float(col[2]), float))
+        self.assertTrue(col[2] == 33.3)
+        col[2] = 142.42
+        self.assertTrue(isinstance(float(col[2]), float))
+        self.assertTrue(col[2] == 142.42)
+
+    def test_stringcolumn_get_set_item(self):
+        col = StringColumn("colname", ["AAA", "AAB", "AAC", "AAD", "AAE"])
+        self.assertTrue(isinstance(col[2], str))
+        self.assertTrue(col[2] == "AAC")
+        col[2] = "NEW_VALUE"
+        self.assertTrue(isinstance(col[2], str))
+        self.assertTrue(col[2] == "NEW_VALUE")
+
+    def test_charcolumn_get_set_item(self):
+        col = CharColumn("colname", ["A", "B", "C", "D", "E"])
+        self.assertTrue(isinstance(col[2], str))
+        self.assertTrue(col[2] == "C")
+        col[2] = "Z"
+        self.assertTrue(isinstance(col[2], str))
+        self.assertTrue(col[2] == "Z")
+
+    def test_booleancolumn_get_set_item(self):
+        col = BooleanColumn("colname", [True, False, True, False, True])
+        self.assertTrue(isinstance(bool(col[2]), bool))
+        self.assertTrue(col[2])
+        col[2] = False
+        self.assertTrue(isinstance(bool(col[2]), bool))
+        self.assertFalse(col[2])
+
+    def test_binarycolumn_get_set_item(self):
+        col = BinaryColumn("colname",
+                           values=[bytearray.fromhex("0101"),
+                                   bytearray.fromhex("0202"),
+                                   bytearray.fromhex("0303"),
+                                   bytearray.fromhex("0404"),
+                                   bytearray.fromhex("0505")])
+
+        self.assertTrue(isinstance(col[2], bytearray))
+        self.assertTrue(col[2] == bytearray.fromhex("0303"))
+        col[2] = bytearray.fromhex("ffffff")
+        self.assertTrue(isinstance(col[2], bytearray))
+        self.assertTrue(col[2] == bytearray.fromhex("ffffff"))
+
+    def test_nullablebytecolumn_get_set_item(self):
+        col = NullableByteColumn("colname", [11, 22, 33, None, 55])
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 33)
+        col[2] = 42
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 42)
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
+
+    def test_nullableshortcolumn_get_set_item(self):
+        col = NullableShortColumn("colname", [11, 22, 33, None, 55])
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 33)
+        col[2] = 142
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 142)
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
+    def test_nullableintcolumn_get_set_item(self):
+        col = NullableIntColumn("colname", [11, 22, 33, None, 55])
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 33)
+        col[2] = 142
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 142)
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
+    def test_nullablelongcolumn_get_set_item(self):
+        col = NullableLongColumn("colname", [11, 22, 33, None, 55])
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 33)
+        col[2] = 142
+        self.assertTrue(isinstance(int(col[2]), int))
+        self.assertTrue(col[2] == 142)
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
+    def test_nullablefloatcolumn_get_set_item(self):
+        col = NullableFloatColumn("colname", [11.1, 22.2, 33.0, None, 55.5])
+        self.assertTrue(isinstance(float(col[2]), float))
+        self.assertTrue(col[2] == 33.0)
+        col[2] = 42.0
+        self.assertTrue(isinstance(float(col[2]), float))
+        self.assertTrue(col[2] == 42.0)
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
+    def test_nullabledoublecolumn_get_set_item(self):
+        col = NullableDoubleColumn("colname", [11.1, 22.2, 33.3, None, 55.5])
+        self.assertTrue(isinstance(float(col[2]), float))
+        self.assertTrue(col[2] == 33.3)
+        col[2] = 142.42
+        self.assertTrue(isinstance(float(col[2]), float))
+        self.assertTrue(col[2] == 142.42)
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
+    def test_nullablestringcolumn_get_set_item(self):
+        col = NullableStringColumn("colname", ["AAA", "AAB", "AAC", None, "AAE"])
+        self.assertTrue(isinstance(col[2], str))
+        self.assertTrue(col[2] == "AAC")
+        col[2] = "NEW_VALUE"
+        self.assertTrue(isinstance(col[2], str))
+        self.assertTrue(col[2] == "NEW_VALUE")
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
+    def test_nullablecharcolumn_get_set_item(self):
+        col = NullableCharColumn("colname", ["A", "B", "C", None, "E"])
+        self.assertTrue(isinstance(col[2], str))
+        self.assertTrue(col[2] == "C")
+        col[2] = "Z"
+        self.assertTrue(isinstance(col[2], str))
+        self.assertTrue(col[2] == "Z")
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
+    def test_nullablebooleancolumn_get_set_item(self):
+        col = NullableBooleanColumn("colname", [True, False, True, None, True])
+        self.assertTrue(isinstance(bool(col[2]), bool))
+        self.assertTrue(col[2])
+        col[2] = False
+        self.assertTrue(isinstance(bool(col[2]), bool))
+        self.assertFalse(col[2])
+
+    def test_nullablebinarycolumn_get_set_item(self):
+        col = NullableBinaryColumn("colname",
+                                   values=[bytearray.fromhex("0101"),
+                                           bytearray.fromhex("0202"),
+                                           bytearray.fromhex("0303"),
+                                           None,
+                                           bytearray.fromhex("0505")])
+
+        self.assertTrue(isinstance(col[2], bytearray))
+        self.assertTrue(col[2] == bytearray.fromhex("0303"))
+        col[2] = bytearray.fromhex("ffffff")
+        self.assertTrue(isinstance(col[2], bytearray))
+        self.assertTrue(col[2] == bytearray.fromhex("ffffff"))
+        self.assertTrue(col[3] is None)
+        col[4] = None
+        self.assertTrue(col[4] is None)
+
 
 
     #********************************************#
     #              Utility Functions             #
     #********************************************#
+
 
 
     def test_static_like(self):
@@ -678,3 +1167,7 @@ class TestColumn(unittest.TestCase):
     def test_static_of_type_none_type(self):
         col2 = column.Column.of_type(type_code=None)
         self.assertTrue(col2 is None)
+
+
+if __name__ == "__main__":
+    unittest.main()

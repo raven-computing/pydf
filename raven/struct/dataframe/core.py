@@ -1906,7 +1906,7 @@ class DataFrame(ABC):
         column = self.__columns[col]
         pattern = regex_matcher.compile(regex)
         for i in range(start_from, self.__next, 1):
-            if pattern.fullmatch(str(column.get_value(i))):
+            if pattern.fullmatch(str(column[i])):
                 return i
 
         return -1
@@ -1948,7 +1948,7 @@ class DataFrame(ABC):
         indices = []
         pattern = regex_matcher.compile(regex)
         for i in range(self.__next):
-            if pattern.fullmatch(str(column.get_value(i))):
+            if pattern.fullmatch(str(column[i])):
                 indices.append(i)
 
         return [] if len(indices) == 0 else indices
@@ -1995,13 +1995,15 @@ class DataFrame(ABC):
             regex = "nan"
 
         indices = self.index_of_all(col, regex)
-        df = NullableDataFrame() if self.__is_nullable else DefaultDataFrame()
+        n_rows = len(indices)
+        cols = [None] * len(self.__columns)
+        for i, c in enumerate(self.__columns):
+            cols[i] = raven.struct.dataframe.column.Column.of_type(c.type_code(), length=n_rows)
 
-        for c in self.__columns:
-            df.add_column(raven.struct.dataframe.column.Column.of_type(c.type_code()))
+        df = NullableDataFrame(cols) if self.__is_nullable else DefaultDataFrame(cols)
 
-        for index in indices:
-            df.add_row(self.get_row(index))
+        for i, index in enumerate(indices):
+            df.set_row(i, self.get_row(index))
 
         if self.__names is not None:
             df.set_column_names(*self.get_column_names())
@@ -2043,7 +2045,7 @@ class DataFrame(ABC):
         i = 0
         k = -1
         while i < self.__next:
-            if not pattern.fullmatch(str(column.get_value(i))):
+            if not pattern.fullmatch(str(column[i])):
                 if k == -1:
                     k = i
 
@@ -2110,7 +2112,7 @@ class DataFrame(ABC):
             result.add_column(raven.struct.dataframe.column.Column.of_type(c.type_code()))
 
         for i in range(self.__next):
-            if not pattern.fullmatch(str(column.get_value(i))):
+            if not pattern.fullmatch(str(column[i])):
                 result.add_row(self.get_row(i))
 
         if self.__names is not None:
@@ -2249,11 +2251,11 @@ class DataFrame(ABC):
 
             factor = fmap.get(val)
             if factor is not None:
-                factors.set_value(i, factor)
+                factors[i] = factor
             else:
                 total_factors += 1
                 fmap[val] = total_factors
-                factors.set_value(i, total_factors)
+                factors[i] = total_factors
 
         self.__columns[col] = factors
         return fmap
@@ -4007,7 +4009,7 @@ class DataFrame(ABC):
                      type(expected).__name__,
                      type(self.__columns[col]).__name__))
 
-        self.__columns[col].set_value(row, value)
+        self.__columns[col][row] = value
 
     def _resize(self):
         """Resizes all Columns sequentially."""
@@ -4095,12 +4097,12 @@ class DataFrame(ABC):
         if regex == "NaN":
             regex = "nan"
 
-        c = self.__columns[col]
+        column = self.__columns[col]
         pattern = regex_matcher.compile(regex)
         replaced = 0
         argcount = len(inspect.getfullargspec(replacement)[0])
         for i in range(self.__next):
-            current_value = c.get_value(i)
+            current_value = column.get_value(i)
             if not pattern.fullmatch(str(current_value)):
                 continue
 
@@ -4125,10 +4127,10 @@ class DataFrame(ABC):
                 continue
 
             try:
-                c.set_value(i, replacement_value)
+                column[i] = replacement_value
             except DataFrameException as ex:
-                msg1 = ("for column '{}'".format(c._name)
-                        if c._name
+                msg1 = ("for column '{}'".format(column._name)
+                        if column._name
                         else "at column index {}".format(col))
 
                 msg2 = (ex.message[18:]
@@ -4364,13 +4366,13 @@ class DataFrame(ABC):
         if regex == "NaN":
             regex = "nan"
 
-        c = self.__columns[col]
+        column = self.__columns[col]
         pattern = regex_matcher.compile(regex)
         i = 0
         k = -1
         removed = 0
         while i < self.__next:
-            if pattern.fullmatch(str(c.get_value(i))):
+            if pattern.fullmatch(str(column[i])):
                 if k == -1:
                     k = i
                 i += 1

@@ -1,3 +1,9 @@
+#### 1.0.3
+* Fixed invalid ASCII range check in NullableCharColumn
+* Improved performance in Column._create_array() implementations by only utilizing numpy functions
+* Improved performance of unique() and count_unique() methods
+* Improved error messages in NullableCharColumn for invalid types
+
 #### 1.0.2
 * Fixed invalid construction of BinaryColumns with predefined column length
 * Improved performance for column value access by using getitem() and setitem() methods

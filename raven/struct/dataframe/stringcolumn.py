@@ -315,7 +315,7 @@ class StringColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        return np.array([None] * size, dtype=np.object)
+        return np.empty(size, dtype=np.object)
 
 class NullableStringColumn(column.Column):
     """A Column holding nullable string values.

@@ -227,8 +227,7 @@ class BooleanColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        val = self.get_default_value()
-        return np.array([val] * size, dtype=np.bool)
+        return np.zeros(size, dtype=np.bool)
 
 class NullableBooleanColumn(column.Column):
     """A Column holding nullable boolean values.

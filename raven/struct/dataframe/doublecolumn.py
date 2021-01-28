@@ -205,8 +205,7 @@ class DoubleColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        val = self.get_default_value()
-        return np.array([val] * size, dtype=np.float64)
+        return np.zeros(size, dtype=np.float64)
 
 class NullableDoubleColumn(column.Column):
     """A Column holding nullable double values.

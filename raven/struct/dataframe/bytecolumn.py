@@ -206,8 +206,7 @@ class ByteColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        val = self.get_default_value()
-        return np.array([val] * size, dtype=np.int8)
+        return np.zeros(size, dtype=np.int8)
 
 class NullableByteColumn(column.Column):
     """A Column holding nullable byte values.

@@ -1888,6 +1888,18 @@ class TestNullableDataFrame(unittest.TestCase):
         truth_boolean = {True}
         self.assertTrue(set3 == truth_boolean, "Sets should be equal")
 
+        self.df.set_char(5, 4, "a")
+        set4 = self.df.unique(5)
+        self.assertTrue(len(set4) == 2, "Unique set size should be 2")
+        truth_char = {"a", "c"}
+        self.assertTrue(set4 == truth_char, "Sets should be equal")
+
+        self.df.set_binary(9, 4, bytearray.fromhex("05"))
+        set5 = self.df.unique(9)
+        self.assertTrue(len(set5) == 2, "Unique set size should be 2")
+        truth_binary = {bytes(bytearray.fromhex("05")), bytes(bytearray.fromhex("000070"))}
+        self.assertTrue(set5 == truth_binary, "Sets should be equal")
+
     def test_unique_by_name(self):
         set1 = self.df.unique("intCol")
         self.assertTrue(len(set1) == 3, "Unique set size should be 3")
@@ -1903,6 +1915,18 @@ class TestNullableDataFrame(unittest.TestCase):
         self.assertTrue(len(set3) == 1, "Unique set size should be 1")
         truth_boolean = {True}
         self.assertTrue(set3 == truth_boolean, "Sets should be equal")
+
+        self.df.set_char("charCol", 4, "a")
+        set4 = self.df.unique("charCol")
+        self.assertTrue(len(set4) == 2, "Unique set size should be 2")
+        truth_char = {"a", "c"}
+        self.assertTrue(set4 == truth_char, "Sets should be equal")
+
+        self.df.set_binary("binaryCol", 4, bytearray.fromhex("05"))
+        set5 = self.df.unique("binaryCol")
+        self.assertTrue(len(set5) == 2, "Unique set size should be 2")
+        truth_binary = {bytes(bytearray.fromhex("05")), bytes(bytearray.fromhex("000070"))}
+        self.assertTrue(set5 == truth_binary, "Sets should be equal")
 
 
 

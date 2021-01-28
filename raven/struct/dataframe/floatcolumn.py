@@ -206,8 +206,7 @@ class FloatColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        val = self.get_default_value()
-        return np.array([val] * size, dtype=np.float32)
+        return np.zeros(size, dtype=np.float32)
 
 class NullableFloatColumn(column.Column):
     """A Column holding nullable float values.

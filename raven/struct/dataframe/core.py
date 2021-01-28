@@ -159,7 +159,8 @@ class DataFrame(ABC):
         WARNING:
 
         This constructor should not be used by API users.
-        Please construct a DataFrame by calling the appropriate static function.
+        Please construct a DataFrame by calling the appropriate static function or
+        directly construct either a DefaultDataFrame or NullableDataFrame object.
 
         For example:
 
@@ -2399,12 +2400,31 @@ class DataFrame(ABC):
         if self.__next == -1 or col < 0 or col >= len(self.__columns):
             raise DataFrameException("Invalid column index: {}".format(col))
 
-        c = self.__columns[col]
-        unique = set()
-        for i in range(self.__next):
-            value = c.get_value(i)
-            if value is not None:
-                unique.add(value)
+        if self.rows() == 0:
+            return set()
+
+        column = self.__columns[col]
+        values = column.as_array()
+        if self.__is_nullable:
+            values = values[values != None]
+
+        unique = np.unique(values)
+        # in-place replacement for bytearray objects to bytes
+        # objects since bytearrays are not hashable
+        if column.type_name() == "binary":
+            for i, _ in enumerate(unique):
+                unique[i] = bytes(unique[i])
+
+        # convert array to set
+        unique = set(unique)
+        # convert uint8 ASCII codes to strings for unique
+        # values in CharColumns and NullableCharColumns
+        if column.type_name() == "char":
+            converted = set()
+            for elem in unique:
+                converted.add(chr(elem))
+
+            unique = converted
 
         return unique
 

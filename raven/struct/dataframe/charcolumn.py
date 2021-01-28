@@ -33,6 +33,17 @@ import raven.struct.dataframe.binarycolumn as binarycolumn
 class CharColumn(column.Column):
     """A Column holding single ASCII-character values.
     This implementation DOES NOT support null values.
+
+    The internal array of CharColumn instances is implemented as an
+    array of uint8 values. From a user perspective, char values are
+    represented as str objects of length one. The internal conversion
+    between str and uint8 takes place with the ord() function and the
+    inverse (i.e. from uint8 to str) with the char() function.
+    Users of this class should be aware of this when performing direct
+    array access as no type checks are enforced by the class in such case.
+
+    Only printable ASCII-character values in the range [32,126]
+    (as uint8 decimal values) are allowed as elements of CharColumns.
     """
 
     TYPE_CODE = 8
@@ -57,7 +68,7 @@ class CharColumn(column.Column):
             values = np.empty(0, dtype=np.uint8)
 
         if isinstance(values, list):
-            charvals = np.zeros(len(values), dtype=np.uint8)
+            charvals = self._create_array(len(values))
             for i, value in enumerate(values):
                 self._check_type(value)
                 charvals[i] = ord(value)
@@ -314,12 +325,23 @@ class CharColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        val = ord(self.get_default_value())
-        return np.array([val] * size, dtype=np.uint8)
+        return np.zeros(size, dtype=np.uint8) + ord(self.get_default_value())
 
 class NullableCharColumn(column.Column):
     """A Column holding nullable single ASCII-character values.
     Any values not explicitly set are considered None.
+
+    The internal array of NullableCharColumn instances is implemented as an
+    array of nullable uint8 values. From a user perspective, char values are
+    represented as str objects of length one. The internal conversion
+    between str and uint8 takes place with the ord() function and the
+    inverse (i.e. from uint8 to str) with the char() function.
+    Users of this class should be aware of this when performing direct
+    array access as no type checks are enforced by the class in such case.
+
+    Only printable ASCII-character values in the range [32,126]
+    (when viewed as uint8 decimal values) are allowed to be
+    used in NullableCharColumns.
     """
 
     TYPE_CODE = 17
@@ -406,10 +428,15 @@ class NullableCharColumn(column.Column):
                          "length 1 but found length {}".format(len(value))))
 
                 byte = ord(value)
-                if (byte < 0) or (byte > 255):
-                    raise dataframe.DataFrameException("Invalid char: " + str(value))
+                if (byte < 32) or (byte > 126):
+                    raise dataframe.DataFrameException(
+                        ("Invalid character value for NullableCharColumn. "
+                         "Only printable ASCII is permitted"))
+
             else:
-                raise dataframe.DataFrameException("Is not char")
+                raise dataframe.DataFrameException(
+                    ("Invalid argument. Expected "
+                     "char (str) but found {}".format(type(value))))
 
     def get_value(self, index):
         """Gets the char value at the specified index

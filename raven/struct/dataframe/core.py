@@ -115,6 +115,13 @@ class DataFrame(ABC):
     with DataFrames. This includes a standard API for serialization and file I/O support
     for DataFrames.
 
+    In addition to the official specification, DataFrames implemented by this module
+    also support various syntactical conveniences through the []-operator, which allows
+    easy read and write access to columns, rows and individual values, as well as slicing.
+    These additions are all optional and the API declared by the specification is not
+    reduced in any way. Using the []-operator can simplify code as it usually looks less
+    verbose than the equivalent standard method calls.
+
     DataFrame instances should not be constructed directly. Various static methods
     are provided for DataFrame and Column construction.
 
@@ -3879,7 +3886,7 @@ class DataFrame(ABC):
 
         self.flush()
         size = 0
-        for _, col in enumerate(self.__columns):
+        for col in self.__columns:
             size += col.memory_usage()
 
         return size
@@ -3903,6 +3910,12 @@ class DataFrame(ABC):
 
     def __iter__(self):
         return Iterator(self)
+
+    def __getitem__(self, position):
+        return dataframeutils.getitem_impl(self, position)
+
+    def __setitem__(self, position, value):
+        dataframeutils.setitem_impl(self, position, value)
 
     def _enforce_types(self, row):
         """Enforces that all entries in the given row adhere to the
@@ -5171,18 +5184,26 @@ class DataFrame(ABC):
 
     @staticmethod
     def read(filepath):
-        """Reads the specified file and returns a DataFrame constituted by the
-        content of that file.
+        """Reads the specified DataFrame file.
+
+        If the specified file path denotes a single DataFrame file, then that DataFrame is
+        read and returned as a single DataFrame instance. If the specified file path denotes
+        a directory, then all DataFrame files in that directory are read, i.e. all files
+        ending with a '.df' fil extension, and a dict is returned mapping all encountered
+        file names (without the '.df' extension) to the corresponding DataFrame instance read.
 
         Args:
-            filepath: The DataFrame file to read. Must be a str representing
-                the path to the file to read
+            filepath: The DataFrame file(s) to read. Must be a str representing
+                the path to a single file to read or a path to a directory containing
+                one or more DataFrame files to read. Must not be None
 
         Returns:
-            A DataFrame from the specified file
+            A DataFrame from the specified file, or a dict mapping all found files in
+            the specified directory to the corresponding DataFrame
 
         Raises:
-            FileNotFoundError: If the specified file cannot be found
+            FileNotFoundError: If the specified file cannot be found or if the
+                directory does not contain any DataFrame files
             PermissionError: If the permission for reading the
                 specified file was denied
             DataFrameException: If any errors occur during deserialization
@@ -5194,10 +5215,17 @@ class DataFrame(ABC):
     def write(filepath, df):
         """Persists the given DataFrame to the specified file.
 
+        If the specified file path denotes a single file, then the 'df' argument must be
+        a single DataFrame instance. If the specified file path denotes a directory, then
+        the 'df' argument must be a dict containing the mapping of str file names to
+        DataFrame instances to persist.
+
         Args:
-            filepath: The file to write the DataFrame to. Must be a str representing
-                the path to the file to write
-            df: The DataFrame to persist. Must not be None
+            filepath: The file or directory to write the DataFrame(s) to. Must be a str
+                representing the path to the file to write or the path to the directory
+                in which to write the DataFrames to. Must not be None
+            df: The DataFrame(s) to persist. Must be either a single DataFrame instance
+                or a dict mapping file names to DataFrame instances. Must not be None
 
         Raises:
             PermissionError: If the permission for writing the

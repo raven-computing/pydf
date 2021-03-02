@@ -922,5 +922,701 @@ class TestDataFrameUtils(unittest.TestCase):
                     "Converted DataFrame should not contain any None values")
 
 
+
+    #*********************************************#
+    #           []-operator and slicing           #
+    #*********************************************#
+
+
+
+    def test_getitem_column_by_index(self):
+        for i in range(self.df.columns()):
+            col = self.df[i]
+            self.assertTrue(col is self.df.get_column(i), "Invalid Column instance")
+
+        for i in range(self.nulldf.columns()):
+            col = self.nulldf[i]
+            self.assertTrue(col is self.nulldf.get_column(i), "Invalid Column instance")
+
+    def test_getitem_column_by_negative_index(self):
+        for i in range(0, self.df.columns()+1, -1):
+            col = self.df[i]
+            self.assertTrue(
+                col is self.df.get_column(i % self.df.columns()),
+                "Invalid Column instance")
+
+        for i in range(0, self.nulldf.columns()+1, -1):
+            col = self.nulldf[i]
+            self.assertTrue(
+                col is self.nulldf.get_column(i % self.nulldf.columns()),
+                "Invalid Column instance")
+
+    def test_getitem_column_by_invalid_index_exception(self):
+        self.assertRaises(DataFrameException, self.df.__getitem__, self.df.columns())
+        self.assertRaises(DataFrameException, self.df.__getitem__, (-1 * self.df.columns())-1)
+        self.assertRaises(DataFrameException, self.nulldf.__getitem__, self.nulldf.columns())
+        self.assertRaises(
+            DataFrameException,
+            self.nulldf.__getitem__, (-1 * self.nulldf.columns())-1)
+
+    def test_getitem_column_by_name(self):
+        for name in self.df.get_column_names():
+            col = self.df[name]
+            self.assertTrue(col is self.df.get_column(name), "Invalid Column instance")
+
+        for name in self.nulldf.get_column_names():
+            col = self.nulldf[name]
+            self.assertTrue(col is self.nulldf.get_column(name), "Invalid Column instance")
+
+    def test_getitem_column_by_invalid_name_exception(self):
+        self.assertRaises(DataFrameException, self.df.__getitem__, "INVALID_COL")
+        self.assertRaises(DataFrameException, self.nulldf.__getitem__, "INVALID_COL")
+
+    def test_getitem_value_by_column_index(self):
+        for i in range(self.df.rows()):
+            row = self.df.get_row(i)
+            for j in range(self.df.columns()):
+                val = self.df[j, i]
+                self.assertTrue(val == row[j], "Unexpected value")
+
+        for i in range(self.nulldf.rows()):
+            row = self.nulldf.get_row(i)
+            for j in range(self.nulldf.columns()):
+                val = self.nulldf[j, i]
+                if row[j] is None:
+                    self.assertTrue(val is None, "Unexpected value")
+                else:
+                    self.assertTrue(val == row[j], "Unexpected value")
+
+    def test_getitem_value_by_column_name(self):
+        for i in range(self.df.rows()):
+            row = self.df.get_row(i)
+            for j in range(self.df.columns()):
+                name = self.df.get_column(j).get_name()
+                val = self.df[name, i]
+                self.assertTrue(val == row[j], "Unexpected value")
+
+        for i in range(self.nulldf.rows()):
+            row = self.nulldf.get_row(i)
+            for j in range(self.nulldf.columns()):
+                name = self.df.get_column(j).get_name()
+                val = self.nulldf[name, i]
+                if row[j] is None:
+                    self.assertTrue(val is None, "Unexpected value")
+                else:
+                    self.assertTrue(val == row[j], "Unexpected value")
+
+    def test_getitem_value_by_negative_column_and_row_index(self):
+        for i in range(0, self.df.rows()+1, -1):
+            row = self.df.get_row(i % self.df.rows())
+            for j in range(0, self.df.columns()+1, -1):
+                val = self.df[j, i]
+                self.assertTrue(val == row[j], "Unexpected value")
+
+        for i in range(0, self.nulldf.rows()+1, -1):
+            row = self.nulldf.get_row(i % self.nulldf.rows())
+            for j in range(0, self.nulldf.columns()+1, -1):
+                val = self.nulldf[j, i]
+                if row[j] is None:
+                    self.assertTrue(val is None, "Unexpected value")
+                else:
+                    self.assertTrue(val == row[j], "Unexpected value")
+
+    def test_getitem_value_by_invalid_column_and_row_index_exception(self):
+        cols = self.df.columns()
+        rows = self.df.rows()
+        self.assertRaises(DataFrameException, self.df.__getitem__, (cols, 0))
+        self.assertRaises(DataFrameException, self.df.__getitem__, (0, rows))
+        self.assertRaises(DataFrameException, self.df.__getitem__, (-1-cols, 0))
+        self.assertRaises(DataFrameException, self.df.__getitem__, (0, -1-rows))
+        cols = self.nulldf.columns()
+        rows = self.nulldf.rows()
+        self.assertRaises(DataFrameException, self.nulldf.__getitem__, (cols, 0))
+        self.assertRaises(DataFrameException, self.nulldf.__getitem__, (0, rows))
+        self.assertRaises(DataFrameException, self.nulldf.__getitem__, (-1-cols, 0))
+        self.assertRaises(DataFrameException, self.nulldf.__getitem__, (0, -1-rows))
+
+    def test_getitem_filter_by_column_index(self):
+        self.df.add_rows(self.df)
+        filtered = self.df[2, "1|3"]
+        self.assertTrue(filtered is not None,
+                        "API violation: Returned DataFrame should not be None")
+
+        self.assertTrue(filtered == self.df.filter(2, "1|3"),
+                        "Filtered DataFrame does not match expected")
+
+        self.nulldf.add_rows(self.nulldf)
+        filtered = self.nulldf[2, "1|3"]
+        self.assertTrue(filtered is not None,
+                        "API violation: Returned DataFrame should not be None")
+
+        self.assertTrue(filtered == self.nulldf.filter(2, "1|3"),
+                        "Filtered DataFrame does not match expected")
+
+    def test_getitem_filter_by_invalid_column_type_exception(self):
+        self.assertRaises(DataFrameException, self.df.__getitem__, ((1, 2), "myregex"))
+        self.assertRaises(
+            DataFrameException,
+            self.df.__getitem__,
+            (("byteCol", "shortCol"), "myregex"))
+
+        self.assertRaises(DataFrameException, self.df.__getitem__, (slice(2, 7, 1), "myregex"))
+        self.assertRaises(
+            DataFrameException,
+            self.nulldf.__getitem__,
+            (slice(2, 7, 1), "myregex"))
+
+    def test_getitem_filter_by_column_name(self):
+        self.df.add_rows(self.df)
+        filtered = self.df["booleanCol", "True"]
+        self.assertTrue(filtered is not None,
+                        "API violation: Returned DataFrame should not be None")
+
+        self.assertTrue(filtered == self.df.filter("booleanCol", "True"),
+                        "Filtered DataFrame does not match expected")
+
+        self.nulldf.add_rows(self.nulldf)
+        filtered = self.nulldf["booleanCol", "True"]
+        self.assertTrue(filtered is not None,
+                        "API violation: Returned DataFrame should not be None")
+
+        self.assertTrue(filtered == self.nulldf.filter("booleanCol", "True"),
+                        "Filtered DataFrame does not match expected")
+
+    def test_getitem_row(self):
+        for i in range(self.df.rows()):
+            row = self.df[:, i]
+            self.assertTrue(row == self.df.get_row(i), "Row does not match expected list")
+
+        for i in range(self.df.rows()):
+            row = self.nulldf[:, i]
+            self.assertTrue(row == self.nulldf.get_row(i), "Row does not match expected list")
+
+    def test_getitem_row_slice_columns(self):
+        for i in range(self.df.rows()):
+            row = self.df[2:7, i]
+            self.assertTrue(
+                row == self.df.get_columns(cols=(2, 3, 4, 5, 6)).get_row(i),
+                "Row does not match expected list")
+
+        for i in range(self.df.rows()):
+            row = self.nulldf[1:6, i]
+            self.assertTrue(
+                row == self.nulldf.get_columns(cols=(1, 2, 3, 4, 5)).get_row(i),
+                "Row does not match expected list")
+
+    def test_getitem_dataframe_slice_rows(self):
+        cols = self.df.columns()
+        rows = self.df.rows()
+        for i in range(cols):
+            for j in range(rows):
+                df = self.df[i:cols, j:rows]
+                c = tuple(range(i, cols))
+                self.assertTrue(
+                    df == self.df.get_columns(cols=c).get_rows(from_index=j, to_index=rows),
+                    "DataFrames do not match")
+
+        cols = self.nulldf.columns()
+        rows = self.nulldf.rows()
+        for i in range(cols):
+            for j in range(rows):
+                df = self.nulldf[i:cols, j:rows]
+                c = tuple(range(i, cols))
+                self.assertTrue(
+                    df == self.nulldf.get_columns(cols=c).get_rows(from_index=j, to_index=rows),
+                    "DataFrames do not match")
+
+    def test_getitem_dataframe_rows_by_index(self):
+        self.df.add_rows(self.df)
+        df = self.df[2, (0, 2, 5)]
+        truth = DataFrame.like(self.df.get_columns(cols=2))
+        for i in [0, 2, 5]:
+            truth.add_row(self.df.get_columns(cols=2).get_row(i))
+
+        self.assertTrue(df == truth, "DataFrames do not match")
+
+        df = self.df[4, (1, 2, 3)]
+        truth = DataFrame.like(self.df.get_columns(cols=4))
+        for i in [1, 2, 3]:
+            truth.add_row(self.df.get_columns(cols=4).get_row(i))
+
+        self.assertTrue(df == truth, "DataFrames do not match")
+
+        self.nulldf.add_rows(self.nulldf)
+        df = self.nulldf["intCol", (0, 2, 5)]
+        truth = DataFrame.like(self.nulldf.get_columns(cols="intCol"))
+        for i in [0, 2, 5]:
+            truth.add_row(self.nulldf.get_columns(cols="intCol").get_row(i))
+
+        self.assertTrue(df == truth, "DataFrames do not match")
+
+        df = self.nulldf["stringCol", (1, 2, 3)]
+        truth = DataFrame.like(self.nulldf.get_columns(cols="stringCol"))
+        for i in [1, 2, 3]:
+            truth.add_row(self.nulldf.get_columns(cols="stringCol").get_row(i))
+
+        self.assertTrue(df == truth, "DataFrames do not match")
+
+    def test_getitem_dataframe_slice_columns_rows_by_index(self):
+        self.df.add_rows(self.df)
+        cols = self.df.columns()
+        rows = self.df.rows()
+        for i in range(cols):
+            for j in range(rows):
+                c = tuple(range(i, cols))
+                r = tuple(range(j, rows))
+                df = self.df[c, r]
+                self.assertTrue(
+                    df == self.df.get_columns(cols=c).get_rows(from_index=j, to_index=rows),
+                    "DataFrames do not match")
+
+        self.nulldf.add_rows(self.nulldf)
+        cols = self.nulldf.columns()
+        rows = self.nulldf.rows()
+        for i in range(cols):
+            for j in range(rows):
+                c = tuple(range(i, cols))
+                r = tuple(range(j, rows))
+                df = self.nulldf[c, r]
+                self.assertTrue(
+                    df == self.nulldf.get_columns(cols=c).get_rows(from_index=j, to_index=rows),
+                    "DataFrames do not match")
+
+    def test_setitem_value_by_column_index(self):
+        truth = self.df.clone()
+        truth.set_int(2, 0, 15)
+        truth.set_int(2, 2, 42)
+        truth.set_string(4, 0, "TEST1")
+        truth.set_string(4, 2, "TEST2")
+        truth.set_boolean(8, 0, False)
+        truth.set_boolean(8, 1, True)
+        self.df[2, 0] = 15
+        self.df[2, 2] = 42
+        self.df[4, 0] = "TEST1"
+        self.df[4, 2] = "TEST2"
+        self.df[8, 0] = False
+        self.df[8, 1] = True
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+    def test_setitem_value_by_negative_column_row_index(self):
+        truth = self.df.clone()
+        truth.set_int(2, 0, 15)
+        truth.set_int(2, 2, 42)
+        truth.set_string(4, 0, "TEST1")
+        truth.set_string(4, 2, "TEST2")
+        truth.set_boolean(8, 0, False)
+        truth.set_boolean(8, 1, True)
+        self.df[-8, -3] = 15
+        self.df[-8, -1] = 42
+        self.df[-6, -3] = "TEST1"
+        self.df[-6, -1] = "TEST2"
+        self.df[-2, -3] = False
+        self.df[-2, -2] = True
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+    def test_setitem_value_by_column_name(self):
+        truth = self.nulldf.clone()
+        truth.set_int("intCol", 0, 15)
+        truth.set_int("intCol", 2, None)
+        truth.set_string("stringCol", 0, "TEST1")
+        truth.set_string("stringCol", 2, None)
+        truth.set_boolean("booleanCol", 0, False)
+        truth.set_boolean("booleanCol", 2, None)
+        self.nulldf["intCol", 0] = 15
+        self.nulldf["intCol", 2] = None
+        self.nulldf["stringCol", 0] = "TEST1"
+        self.nulldf["stringCol", 2] = None
+        self.nulldf["booleanCol", 0] = False
+        self.nulldf["booleanCol", 2] = None
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_value_slice_rows_by_column_index(self):
+        self.df.add_rows(self.df)
+        truth = self.df.clone()
+        for i in range(1, 5):
+            truth.set_int(2, i, 42)
+        for i in range(0, 4):
+            truth.set_string(4, i, "TEST")
+        for i in range(2, truth.rows()):
+            truth.set_boolean(8, i, False)
+
+        self.df[2, 1:5] = 42
+        self.df[(4, ), :4] = "TEST"
+        self.df[8:9, 2:] = False
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+    def test_setitem_value_slice_rows_by_column_name(self):
+        self.nulldf.add_rows(self.nulldf)
+        truth = self.nulldf.clone()
+        for i in range(1, 5):
+            truth.set_int("intCol", i, 42)
+        for i in range(0, 4):
+            truth.set_string("stringCol", i, None)
+        for i in range(2, truth.rows()):
+            truth.set_boolean("booleanCol", i, False)
+
+        self.nulldf["intCol", 1:5] = 42
+        self.nulldf["stringCol", :4] = None
+        self.nulldf["booleanCol", 2:] = False
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_replace_by_column_index(self):
+        self.df.add_rows(self.df)
+        truth = self.df.clone()
+        truth.replace(2, "1|3", 42)
+        truth.replace(5, "a|c", "F")
+        truth.replace(8, "True", False)
+        self.df[2, "1|3"] = 42
+        self.df[5, "a|c"] = "F"
+        self.df[8, "True"] = False
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+    def test_setitem_replace_by_column_name(self):
+        self.nulldf.add_rows(self.nulldf)
+        truth = self.nulldf.clone()
+        truth.replace(0, "2", 42)
+        truth.replace(5, "a|D", "F")
+        truth.replace(8, "True", None)
+        self.nulldf[2, "2"] = 42
+        self.nulldf[5, "a|D"] = "F"
+        self.nulldf[8, "True"] = None
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_column_by_index(self):
+        self.df[0] = LongColumn("TEST1", [11, 22, 33])
+        self.df[4] = StringColumn("TEST2", ["val1", "val2", "val3"])
+        self.df[6] = BooleanColumn(values=[False, False, True])
+        self.assertTrue(self.df.columns() == 10, "DataFrame should have 10 columns")
+        self.assertTrue(self.df.get_column(0).type_name() == "long", "Column type does not match")
+        self.assertTrue(self.df.get_column(0).get_name() == "TEST1", "Column name does not match")
+        self.assertTrue(
+            self.df.get_column(0).as_array().tolist() == [11, 22, 33],
+            "Column values do not match")
+
+        self.assertTrue(
+            self.df.get_column(4).type_name() == "string",
+            "Column type does not match")
+
+        self.assertTrue(
+            self.df.get_column(4).get_name() == "TEST2",
+            "Column name does not match")
+
+        self.assertTrue(
+            self.df.get_column(4).as_array().tolist() == ["val1", "val2", "val3"],
+            "Column values do not match")
+
+        self.assertTrue(
+            self.df.get_column(6).type_name() == "boolean",
+            "Column type does not match")
+
+        self.assertTrue(
+            self.df.get_column(6) is self.df.get_column("floatCol"),
+            "Columns do not match")
+
+        self.assertTrue(
+            self.df.get_column(6).get_name() == "floatCol", "Column name does not match")
+
+        self.assertTrue(
+            self.df.get_column(6).as_array().tolist() == [False, False, True],
+            "Column values do not match")
+
+    def test_setitem_set_column_by_name(self):
+        self.nulldf["intCol"] = NullableLongColumn("TEST1", [11, 22, None])
+        self.nulldf["stringCol"] = NullableStringColumn("TEST2", ["val1", None, "val3"])
+        self.nulldf["floatCol"] = NullableBooleanColumn(values=[None, None, True])
+        self.assertTrue(self.nulldf.columns() == 10, "DataFrame should have 10 columns")
+        self.assertTrue(
+            self.nulldf.get_column("intCol").type_name() == "long",
+            "Column type does not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("intCol").get_name() == "intCol",
+            "Column name does not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("intCol").as_array().tolist() == [11, 22, None],
+            "Column values do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("stringCol").type_name() == "string",
+            "Column type does not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("stringCol").get_name() == "stringCol",
+            "Column name does not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("stringCol").as_array().tolist() == ["val1", None, "val3"],
+            "Column values do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("floatCol").type_name() == "boolean",
+            "Column type does not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("floatCol").get_name() == "floatCol",
+            "Column name should be None")
+
+        self.assertTrue(
+            self.nulldf.get_column("floatCol").as_array().tolist() == [None, None, True],
+            "Column values do not match")
+
+    def test_setitem_add_column_by_index(self):
+        self.df[10] = LongColumn("TEST1", [11, 22, 33])
+        self.df[11] = StringColumn("TEST2", ["val1", "val2", "val3"])
+        self.df[12] = BooleanColumn(values=[False, False, True])
+        self.assertTrue(self.df.columns() == 13, "DataFrame should have 13 columns")
+        self.assertTrue(self.df.get_column(10).type_name() == "long", "Column type does not match")
+        self.assertTrue(self.df.get_column(10).get_name() == "TEST1", "Column name does not match")
+        self.assertTrue(
+            self.df.get_column(10).as_array().tolist() == [11, 22, 33],
+            "Column values do not match")
+
+        self.assertTrue(
+            self.df.get_column(11).type_name() == "string",
+            "Column type does not match")
+
+        self.assertTrue(
+            self.df.get_column(11).get_name() == "TEST2",
+            "Column name does not match")
+
+        self.assertTrue(
+            self.df.get_column(11).as_array().tolist() == ["val1", "val2", "val3"],
+            "Column values do not match")
+
+        self.assertTrue(
+            self.df.get_column(12).type_name() == "boolean",
+            "Column type does not match")
+
+        self.assertTrue(
+            self.df.get_column(12).get_name() is None, "Column name should be None")
+
+        self.assertTrue(
+            self.df.get_column(12).as_array().tolist() == [False, False, True],
+            "Column values do not match")
+
+    def test_setitem_add_column_by_name(self):
+        self.nulldf["TEST_A"] = NullableLongColumn("TEST1", [11, 22, None])
+        self.nulldf["TEST_B"] = NullableStringColumn("TEST2", ["val1", "val2", None])
+        self.nulldf["TEST_C"] = NullableBooleanColumn(values=[False, False, None])
+        self.assertTrue(self.nulldf.columns() == 13, "DataFrame should have 13 columns")
+        self.assertTrue(
+            self.nulldf.get_column("TEST_A").type_name() == "long",
+            "Column names do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("TEST_A").get_name() == "TEST_A",
+            "Column name do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("TEST_A").as_array().tolist() == [11, 22, None],
+            "Column values do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("TEST_B").type_name() == "string",
+            "Column names do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("TEST_B").get_name() == "TEST_B",
+            "Column names do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("TEST_B").as_array().tolist() == ["val1", "val2", None],
+            "Column values do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("TEST_C").type_name() == "boolean",
+            "Column type does not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("TEST_C").get_name() == "TEST_C",
+            "Column names do not match")
+
+        self.assertTrue(
+            self.nulldf.get_column("TEST_C").as_array().tolist() == [False, False, None],
+            "Column values do not match")
+
+    def test_setitem_set_single_row(self):
+        truth = self.df.clone()
+        truth.set_row(0, [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        truth.set_row(1, [6, 6, 6, 6, "66", "F", 6.0, 6.0, False, bytearray.fromhex("0066")])
+        truth.set_row(2, [7, 7, 7, 7, "77", "G", 7.0, 7.0, True, bytearray.fromhex("aa77")])
+        self.df[:, 0] = [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")]
+        self.df[:, 1] = [6, 6, 6, 6, "66", "F", 6.0, 6.0, False, bytearray.fromhex("0066")]
+        self.df[:, 2] = [7, 7, 7, 7, "77", "G", 7.0, 7.0, True, bytearray.fromhex("aa77")]
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+        truth = self.nulldf.clone()
+        truth.set_row(0, [4, None, 4, None, "42", "D", None, 4.0, True, None])
+        truth.set_row(1, [6, 6, 6, 6, "66", "F", 6.0, 6.0, False, bytearray.fromhex("0066")])
+        truth.set_row(2, [7, 7, 7, None, "77", "G", 7.0, 7.0, None, None])
+        self.nulldf[:, 0] = [4, None, 4, None, "42", "D", None, 4.0, True, None]
+        self.nulldf[:, 1] = [6, 6, 6, 6, "66", "F", 6.0, 6.0, False, bytearray.fromhex("0066")]
+        self.nulldf[:, 2] = [7, 7, 7, None, "77", "G", 7.0, 7.0, None, None]
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_multiple_rows(self):
+        self.df.add_rows(self.df)
+        truth = self.df.clone()
+        truth.set_row(1, [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        truth.set_row(3, [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        truth.set_row(5, [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        self.df[:, (1, 3, 5)] = [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")]
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+        self.nulldf.add_rows(self.nulldf)
+        truth = self.nulldf.clone()
+        truth.set_row(1, [4, None, 4, None, "42", "D", None, 4.0, True, None])
+        truth.set_row(3, [4, None, 4, None, "42", "D", None, 4.0, True, None])
+        truth.set_row(5, [4, None, 4, None, "42", "D", None, 4.0, True, None])
+        self.nulldf[:, (1, 3, 5)] = [4, None, 4, None, "42", "D", None, 4.0, True, None]
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_multiple_rows_slices(self):
+        self.df.add_rows(self.df)
+        truth = self.df.clone()
+        truth.set_row(1, [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        truth.set_row(2, [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        truth.set_row(3, [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        self.df[:, 1:4] = [4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")]
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+        self.nulldf.add_rows(self.nulldf)
+        truth = self.nulldf.clone()
+        truth.set_row(0, [4, None, 4, None, "42", "D", None, 4.0, True, None])
+        truth.set_row(2, [4, None, 4, None, "42", "D", None, 4.0, True, None])
+        truth.set_row(4, [4, None, 4, None, "42", "D", None, 4.0, True, None])
+        self.nulldf[:, ::2] = [4, None, 4, None, "42", "D", None, 4.0, True, None]
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_single_row_with_specific_column(self):
+        truth = self.df.clone()
+        truth.set_int("intCol", 1, 4)
+        truth.set_string("stringCol", 1, "TEST")
+        truth.set_boolean("booleanCol", 1, True)
+        self.df[("intCol", "stringCol", "booleanCol"), 1] = [4, "TEST", True]
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+        truth = self.nulldf.clone()
+        truth.set_int("intCol", 0, 4)
+        truth.set_string("stringCol", 0, "TEST")
+        truth.set_boolean("booleanCol", 0, None)
+        self.nulldf[("intCol", "stringCol", "booleanCol"), 0] = [4, "TEST", None]
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_single_row_column_slice(self):
+        truth = self.df.clone()
+        truth.set_short(1, 1, 42)
+        truth.set_int(2, 1, 43)
+        truth.set_long(3, 1, 44)
+        truth.set_string(4, 1, "TEST")
+        self.df[1:5, 1] = [42, 43, 44, "TEST"]
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+        truth = self.nulldf.clone()
+        truth.set_short(1, 2, 42)
+        truth.set_long(3, 2, 43)
+        truth.set_char(5, 2, "F")
+        truth.set_double(7, 2, 4.0)
+        truth.set_binary(9, 2, None)
+        self.nulldf[1::2, 2] = [42, 43, "F", 4.0, None]
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_multiple_rows_dataframe(self):
+        self.df.add_rows(self.df)
+        replacement = DataFrame.like(self.df)
+        replacement.add_row([7, 7, 7, 7, "77", "7", 7.0, 7.0, False, bytearray.fromhex("0077")])
+        replacement.add_row([8, 8, 8, 8, "88", "8", 8.0, 8.0, True, bytearray.fromhex("0088")])
+        replacement.add_row([9, 9, 9, 9, "99", "9", 9.0, 9.0, False, bytearray.fromhex("0099")])
+        truth = self.df.clone()
+        truth.set_row(2, replacement.get_row(0))
+        truth.set_row(4, replacement.get_row(1))
+        truth.set_row(5, replacement.get_row(2))
+        self.df[:, (2, 4, 5)] = replacement
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+        self.nulldf.add_rows(self.nulldf)
+        replacement = DataFrame.like(self.nulldf)
+        replacement.add_row([7, 7, None, 7, "77", "7", None, 7.0, False, None])
+        replacement.add_row([8, None, 8, 8, None, "8", 8.0, None, True, bytearray.fromhex("0088")])
+        replacement.add_row([None, 9, 9, None, "99", None, 9.0, None, False, None])
+        truth = self.nulldf.clone()
+        truth.set_row(0, replacement.get_row(0))
+        truth.set_row(2, replacement.get_row(1))
+        truth.set_row(4, replacement.get_row(2))
+        self.nulldf[:, (0, 2, 4)] = replacement
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_multiple_rows_constant_value(self):
+        self.df.add_rows(self.df)
+        truth = self.df.clone()
+        truth.get_columns(("stringCol", "charCol")).set_row(2, ["#", "#"])
+        truth.get_columns(("stringCol", "charCol")).set_row(4, ["#", "#"])
+        truth.get_columns(("stringCol", "charCol")).set_row(5, ["#", "#"])
+        self.df[("stringCol", "charCol"), (2, 4, 5)] = "#"
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+        truth.get_columns(("stringCol", "charCol")).set_row(2, ["#", "#"])
+        truth.get_columns(("stringCol", "charCol")).set_row(4, ["-", "-"])
+        truth.get_columns(("stringCol", "charCol")).set_row(5, [";", ";"])
+        self.df[("stringCol", "charCol"), 4] = "-"
+        self.df[("stringCol", "charCol"), 5] = ";"
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+    def test_setitem_set_multiple_rows_dataframe_columns_select(self):
+        self.df.add_rows(self.df)
+        replacement = DataFrame.like(self.df.get_columns(cols=(3, 5, 8)))
+        replacement.add_row([7, "7", False])
+        replacement.add_row([8, "8", True])
+        replacement.add_row([9, "9", False])
+        truth = self.df.clone()
+        truth.get_columns(cols=(3, 5, 8)).set_row(2, replacement.get_row(0))
+        truth.get_columns(cols=(3, 5, 8)).set_row(3, replacement.get_row(1))
+        truth.get_columns(cols=(3, 5, 8)).set_row(5, replacement.get_row(2))
+        self.df[(3, 5, 8), (2, 3, 5)] = replacement
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+        self.nulldf.add_rows(self.nulldf)
+        replacement = DataFrame.like(self.nulldf.get_columns(cols=("stringCol", "doubleCol")))
+        replacement.add_row(["77", 7.0])
+        replacement.add_row(["88", 8.0])
+        replacement.add_row(["99", 9.0])
+        truth = self.nulldf.clone()
+        truth.get_columns(cols=("stringCol", "doubleCol")).set_row(0, replacement.get_row(0))
+        truth.get_columns(cols=("stringCol", "doubleCol")).set_row(2, replacement.get_row(1))
+        truth.get_columns(cols=("stringCol", "doubleCol")).set_row(4, replacement.get_row(2))
+        self.nulldf[("stringCol", "doubleCol"), (0, 2, 4)] = replacement
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_multiple_rows_dataframe_column_slice(self):
+        self.df.add_rows(self.df)
+        replacement = DataFrame.like(self.df.get_columns(cols=(2, 4, 6, 8)))
+        replacement.add_row([7, "777", 7.0, False])
+        replacement.add_row([8, "888", 8.0, True])
+        truth = self.df.clone()
+        truth.get_columns(cols=(2, 4, 6, 8)).set_row(2, replacement.get_row(0))
+        truth.get_columns(cols=(2, 4, 6, 8)).set_row(4, replacement.get_row(1))
+        self.df[2::2, (2, 4)] = replacement
+        self.assertTrue(self.df == truth, "DataFrames do not match")
+
+        self.nulldf.add_rows(self.nulldf)
+        replacement = DataFrame.like(
+            self.nulldf.get_columns(cols=("longCol", "stringCol", "charCol")))
+
+        replacement.add_row([77, "77", "A"])
+        replacement.add_row([88, "88", "B"])
+        replacement.add_row([99, "99", "C"])
+        truth = self.nulldf.clone()
+        truth.get_columns(
+            cols=("longCol", "stringCol", "charCol")).set_row(0, replacement.get_row(0))
+        truth.get_columns(
+            cols=("longCol", "stringCol", "charCol")).set_row(1, replacement.get_row(1))
+        truth.get_columns(
+            cols=("longCol", "stringCol", "charCol")).set_row(3, replacement.get_row(2))
+
+        self.nulldf[3:6, (0, 1, 3)] = replacement
+        self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+
+
 if __name__ == "__main__":
     unittest.main()

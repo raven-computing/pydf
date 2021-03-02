@@ -16,6 +16,7 @@
 Provides serialization and I/O support for DataFrames.
 """
 
+import os
 import zlib
 import base64
 
@@ -93,10 +94,17 @@ def deserialize(data):
 def write_file(filepath, df):
     """Persists the given DataFrame to the specified file.
 
+    If the specified file path denotes a single file, then the 'df' argument must be
+    a single DataFrame instance. If the specified file path denotes a directory, then
+    the 'df' argument must be a dict containing the mapping of str file names to
+    DataFrame instances to persist.
+
     Args:
-        filepath: The file to write the DataFrame to. Must be a str representing
-            the path to the file to write
-        df: The DataFrame to persist. Must not be None
+        filepath: The file or directory to write the DataFrame(s) to. Must be a str
+            representing the path to the file to write or the path to the directory
+            in which to write the DataFrames to. Must not be None
+        df: The DataFrame(s) to persist. Must be either a single DataFrame instance
+            or a dict mapping file names to DataFrame instances. Must not be None
 
     Raises:
         PermissionError: If the permission for writing the
@@ -109,33 +117,83 @@ def write_file(filepath, df):
             ("Invalid argument 'filepath'. "
              "Expected str but found {}").format(type(filepath)))
 
-    data = _compress(serialize(df))
-    with open(filepath, "wb") as f:
-        f.write(data)
+    if os.path.isdir(filepath):
+        if not isinstance(df, dict):
+            raise ValueError(
+                ("Invalid argument 'df'. "
+                 "Expected dict mapping str to "
+                 "DataFrame but found {}").format(type(df)))
+
+        for k, v in df.items():
+            if not isinstance(k, str):
+                raise ValueError(
+                    ("Invalid key type. Expected "
+                     "str but found {}").format(type(k)))
+
+            if not isinstance(v, dataframe.DataFrame):
+                raise ValueError(
+                    ("Invalid value type. Expected "
+                     "DataFrame but found {}").format(type(v)))
+
+            name = k if k.endswith(".df") else k + ".df"
+            _write_file0(os.path.join(filepath, name), v)
+
+    else:
+        if not isinstance(df, dataframe.DataFrame):
+            raise ValueError(
+                ("Invalid argument 'df'. "
+                 "Expected DataFrame but found {}").format(type(df)))
+
+        _write_file0(filepath, df)
 
 def read_file(filepath):
-    """Reads the specified file and returns a DataFrame constituted by the
-    content of that file.
+    """Reads the specified DataFrame file.
+
+    If the specified file path denotes a single DataFrame file, then that DataFrame is
+    read and returned as a single DataFrame instance. If the specified file path denotes
+    a directory, then all DataFrame files in that directory are read, i.e. all files
+    ending with a '.df' fil extension, and a dict is returned mapping all encountered
+    file names (without the '.df' extension) to the corresponding DataFrame instance read.
 
     Args:
-        filepath: The DataFrame file to read. Must be a str representing
-            the path to the file to read
+        filepath: The DataFrame file(s) to read. Must be a str representing
+            the path to a single file to read or a path to a directory containing
+            one or more DataFrame files to read. Must not be None
 
     Returns:
-        A DataFrame from the specified file
+        A DataFrame from the specified file, or a dict mapping all found files in
+        the specified directory to the corresponding DataFrame
 
     Raises:
-        FileNotFoundError: If the specified file cannot be found
+        FileNotFoundError: If the specified file cannot be found or if the
+            directory does not contain any DataFrame files
         PermissionError: If the permission for reading the
             specified file was denied
         DataFrameException: If any errors occur during deserialization
             or the file format is invalid
     """
-    with open(filepath, mode="rb") as f:
-        data = f.read()
-        data = bytearray(data)
+    if not isinstance(filepath, str):
+        raise ValueError(
+            ("Invalid argument 'filepath'. "
+             "Expected str but found {}").format(type(filepath)))
 
-    return deserialize(_decompress(data))
+    if os.path.isdir(filepath):
+        files = [f for f in os.listdir(filepath) if f.endswith(".df")]
+        if len(files) == 0:
+            raise FileNotFoundError(
+                ("The specified directory does not contain "
+                 "any DataFrame (.df) files: '{}'")
+                .format(filepath))
+
+        dataframes = dict()
+        for f in files:
+            name = f[:-3]
+            dataframes[name] = _read_file0(os.path.join(filepath, f))
+
+        return dataframes
+
+    else:
+        return _read_file0(filepath)
 
 def from_base64(string):
     """Deserializes the given Base64 encoded string to a DataFrame.
@@ -170,6 +228,48 @@ def to_base64(df):
         DataFrameException: If any errors occur during serialization
     """
     return base64.b64encode(_compress(serialize(df))).decode("utf-8")
+
+def _read_file0(filepath):
+    """Reads the specified file and returns a DataFrame constituted by the
+    content of that file.
+
+    Args:
+        filepath: The DataFrame file to read. Must be a str representing
+            the path to the file to read
+
+    Returns:
+        A DataFrame from the specified file
+
+    Raises:
+        FileNotFoundError: If the specified file cannot be found
+        PermissionError: If the permission for reading the
+            specified file was denied
+        DataFrameException: If any errors occur during deserialization
+            or the file format is invalid
+    """
+    with open(filepath, mode="rb") as f:
+        data = f.read()
+        data = bytearray(data)
+
+    return deserialize(_decompress(data))
+
+def _write_file0(filepath, df):
+    """Persists the given DataFrame to the specified file.
+
+    Args:
+        filepath: The file to write the DataFrame to. Must be a str representing
+            the path to the file to write
+        df: The DataFrame to persist. Must not be None
+
+    Raises:
+        PermissionError: If the permission for writing the
+            specified file was denied
+        DataFrameException: If any errors occur during file persistence
+            or if any errors occur during serialization
+    """
+    data = _compress(serialize(df))
+    with open(filepath, "wb") as f:
+        f.write(data)
 
 def _compress(data):
     """Compresses the given bytearray such that it represents

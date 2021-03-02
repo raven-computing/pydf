@@ -24,7 +24,7 @@ with open(os.path.join(PROJECT_ROOT, "README.md")) as f:
 
 setup(
     name="raven-pydf",
-    version="1.0.3",
+    version="1.1.0",
     description="An implementation of the DataFrame specification in Python",
     long_description=README,
     long_description_content_type="text/markdown",

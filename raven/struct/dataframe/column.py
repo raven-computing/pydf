@@ -536,7 +536,7 @@ class Column(ABC):
         index is out of bounds.
         """
         if index < 0 or index >= self._values.shape[0]:
-            raise dataframe.DataFrameException("Invalid index: {}".format(index))
+            raise dataframe.DataFrameException("Invalid row index: {}".format(index))
 
     def _insert_value_at(self, index, next_pos, value):
         """Inserts the specified value at the given index into the column.

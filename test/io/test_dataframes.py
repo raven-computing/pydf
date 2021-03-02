@@ -29,6 +29,7 @@ from raven.struct.dataframe import (DataFrame,
 class TestDataFramesIO(unittest.TestCase):
     """Tests for DataFrame serialization and file I/O implementation."""
 
+    DIR_TEST_RESOURCES = os.path.dirname(__file__)
     FILE_DEFAULT = os.path.join(os.path.dirname(__file__), "test_default.df")
     FILE_NULLABLE = os.path.join(os.path.dirname(__file__), "test_nullable.df")
 
@@ -360,6 +361,23 @@ class TestDataFramesIO(unittest.TestCase):
 
         df = DataFrame.read(TestDataFramesIO.FILE_NULLABLE)
         self.assertTrue(df.equals(TestDataFramesIO.df_nullable), "DataFrames do not match")
+
+    def test_file_read_multiple_files_in_dir(self):
+        if not os.path.exists(TestDataFramesIO.DIR_TEST_RESOURCES):
+            self.fail(
+                ("Test resource directory '{}' was not found")
+                .format(TestDataFramesIO.DIR_TEST_RESOURCES))
+
+        files = DataFrame.read(TestDataFramesIO.DIR_TEST_RESOURCES)
+        self.assertTrue(isinstance(files, dict), "Returned object should be of type dict")
+        self.assertTrue(len(files) == 2, "Returned dict should have 2 elements")
+        self.assertTrue(
+            files["test_default"].equals(DataFrame.read(TestDataFramesIO.FILE_DEFAULT)),
+            "DataFrames do not match")
+
+        self.assertTrue(
+            files["test_nullable"].equals(DataFrame.read(TestDataFramesIO.FILE_NULLABLE)),
+            "DataFrames do not match")
 
 
 if __name__ == "__main__":

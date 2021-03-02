@@ -45,18 +45,13 @@ def copy_of(df):
     if df is None:
         return None
 
+    df.flush()
+    columns = [col.clone() for col in df._internal_columns()]
     copy = None
     if df.is_nullable():
-        copy = dataframe.NullableDataFrame()
+        copy = dataframe.NullableDataFrame(columns)
     else:
-        copy = dataframe.DefaultDataFrame()
-
-    df.flush()
-    for col in df:
-        copy.add_column(col.clone())
-
-    if df.has_column_names():
-        copy.set_column_names(df.get_column_names())
+        copy = dataframe.DefaultDataFrame(columns)
 
     return copy
 
@@ -692,3 +687,406 @@ def _cast_to_numeric_type(col, value):
             return int(value)
         else:
             raise dataframe.DataFrameException("Unrecognized column type")
+
+def getitem_impl(arg, position):
+    """Implementation of the __getitem__() function
+
+    Args:
+        arg: The DataFrame instance on which the function was called upon
+        position: The position argument passed to the function
+
+    Returns:
+        The value at the specified position
+    """
+    if isinstance(position, tuple):
+        if len(position) > 2:
+            raise dataframe.DataFrameException(
+                ("Invalid position argument. Too many "
+                 "positions specified: {}").format(len(position)))
+
+        cols = position[0]
+        rows = position[1]
+        if isinstance(cols, (int, str)):
+            # check for negative column indices
+            if isinstance(cols, int) and cols < 0:
+                if abs(cols) > arg.columns():
+                    raise dataframe.DataFrameException(
+                        "Invalid column index: {}".format(cols))
+
+                cols = cols % arg.columns()
+
+            if rows is None:
+                # implements df[x, :] and df["x", :]
+                return arg.get_columns(cols=cols)
+            elif isinstance(rows, int):
+                # implements df[x, y] and df["x", y]
+                if rows < 0:
+                    if abs(rows) > arg.rows():
+                        raise dataframe.DataFrameException(
+                            "Invalid row index: {}".format(rows))
+
+                    rows = rows % arg.rows()
+
+                return arg.get_column(cols).get_value(rows)
+            elif isinstance(rows, str):
+                # implements df[x, "y_regex"] and df["x", "y_regex"]
+                return arg.filter(cols, rows)
+            elif isinstance(rows, tuple):
+                # implements df[x, (y0, y1, ..., yn)]
+                # and        df["x", (y0, y1, ..., yn)]
+                col_selected = arg.get_column(cols)
+                col = column.Column.like(col_selected, length=len(rows))
+                df = (dataframe.NullableDataFrame(col)
+                      if arg.is_nullable()
+                      else dataframe.DefaultDataFrame(col))
+
+                for i, row_index in enumerate(rows):
+                    col[i] = col_selected[row_index]
+
+                return df
+
+            elif isinstance(rows, slice):
+                # implements df[x, y0:y1:y2]
+                # and        df["x", y0:y1:y2]
+                start = rows.start
+                stop = rows.stop
+                step = rows.step
+                col_selected = arg.get_column(cols)
+                # numpy returns an array view when slicing
+                # so we have to copy the array explicitly
+                # to get an independent instance
+                col_values = col_selected._values[start:stop:step].copy()
+                col = column.Column.like(col_selected, length=0)
+                col._values = col_values
+                return (dataframe.NullableDataFrame(col)
+                        if arg.is_nullable()
+                        else dataframe.DefaultDataFrame(col))
+
+        elif isinstance(cols, (tuple, slice)):
+            # prefetch the selected columns as a DataFrame
+            if isinstance(cols, tuple):
+                cols_selected = arg.get_columns(cols=cols)
+            else: # is slice
+                cols_selected = arg._internal_columns()[cols]
+                cols_selected = (dataframe.NullableDataFrame(cols_selected)
+                                 if arg.is_nullable()
+                                 else dataframe.DefaultDataFrame(cols_selected))
+
+            if rows is None:
+                # implements df[(x0, x1, ..., xn), ]
+                # and        df[x0:x1:x2, ]
+                return cols_selected
+            elif isinstance(rows, int):
+                # implements df[(x0, x1, ..., xn), y]
+                # and        df[x0:x1:x2, y]
+                if rows < 0:
+                    if abs(rows) > arg.rows():
+                        raise dataframe.DataFrameException(
+                            "Invalid row index: {}".format(rows))
+
+                    rows = rows % arg.rows()
+
+                return cols_selected.get_row(rows)
+
+            elif isinstance(rows, tuple):
+                # implements df[(x0, x1, ..., xn), (y0, y1, ..., ym)]
+                # and        df[x0:x1:x2, (y0, y1, ..., ym)]
+                cols = [column.Column.like(col, length=len(rows))
+                        for col in cols_selected._internal_columns()]
+
+                df = (dataframe.NullableDataFrame(cols)
+                      if arg.is_nullable()
+                      else dataframe.DefaultDataFrame(cols))
+
+                for i, row_index in enumerate(rows):
+                    df.set_row(i, cols_selected.get_row(rows[i]))
+
+                return df
+
+            elif isinstance(rows, slice):
+                # implements df[(x0, x1, ..., xn), y0:y1:y2]
+                # and        df[x0:x1:x2, y0:y1:y2]
+                start = rows.start
+                stop = rows.stop
+                step = rows.step
+                cols = [None] * cols_selected.columns()
+                for i, col in enumerate(cols_selected._internal_columns()):
+                    col_values = col._values[start:stop:step].copy()
+                    col_sliced = column.Column.like(col, length=col_values.shape[0])
+                    col_sliced._values = col_values
+                    cols[i] = col_sliced
+
+                return (dataframe.NullableDataFrame(cols)
+                        if arg.is_nullable()
+                        else dataframe.DefaultDataFrame(cols))
+
+            elif isinstance(rows, str):
+                raise dataframe.DataFrameException(
+                    ("Invalid column position type. A filter operation "
+                     "must only specify a single column "
+                     "but found {}").format(type(cols)))
+
+        else:
+            # invalid type for column position arg
+            raise dataframe.DataFrameException(
+                ("Invalid column position type. "
+                 "Expected int or str but found {}").format(type(cols)))
+
+    elif isinstance(position, int):
+        # implements df[x]
+        if position < 0:
+            if abs(position) > arg.columns():
+                raise dataframe.DataFrameException(
+                    "Invalid column index: {}".format(position))
+
+            position = position % arg.columns()
+
+        return arg.get_column(position)
+    elif isinstance(position, str):
+        # implements df["x"]
+        return arg.get_column(position)
+    else:
+        # invalid type for entire position arg
+        raise dataframe.DataFrameException(
+            ("Invalid position type. "
+             "Expected int or str but "
+             "found {}").format(type(position)))
+
+    # make pylint happy about missing return statement
+    raise dataframe.DataFrameException("Implementation error")
+
+def setitem_impl(arg, position, value):
+    """Implementation of the __setitem__() function.
+
+    Args:
+        arg: The DataFrame instance on which the function was called upon
+        position: The position argument passed to the function
+        value: The value argument passed to the function
+    """
+    if isinstance(position, tuple):
+        if len(position) > 2:
+            raise dataframe.DataFrameException(
+                ("Invalid position argument. Too many "
+                 "positions specified: {}").format(len(position)))
+
+        cols = position[0]
+        rows = position[1]
+        if isinstance(cols, (int, str)):
+            # check for negative column indices
+            if isinstance(cols, int) and cols < 0:
+                if abs(cols) > arg.columns():
+                    raise dataframe.DataFrameException(
+                        "Invalid column index: {}".format(cols))
+
+                cols = cols % arg.columns()
+
+            if rows is None:
+                # implements df[x, :] = Column
+                # and        df["x", :] = Column
+                arg.set_column(cols, value)
+            elif isinstance(rows, int):
+                # implements df[x, y] = v
+                # and        df["x", y] = v
+                if rows < 0:
+                    if abs(rows) > arg.rows():
+                        raise dataframe.DataFrameException(
+                            "Invalid row index: {}".format(rows))
+
+                    rows = rows % arg.rows()
+
+                arg.get_column(cols).set_value(rows, value)
+            elif isinstance(rows, str):
+                # implements df[x, "y_regex"] = v | func | lamda
+                # and        df["x", "y_regex"] = v | func | lamda
+                arg.replace(cols, rows, replacement=value)
+            elif isinstance(rows, tuple):
+                # implements df[x, (y0, y1, ..., yn)] = (v0, v1, ..., vn)
+                # and        df["x", (y0, y1, ..., yn)] = (v0, v1, ..., vn)
+                col = arg.get_column(cols)
+                if isinstance(value, (list, tuple)):
+                    if len(rows) != len(value):
+                        raise dataframe.DataFrameException(
+                            ("Invalid value argument. The specified "
+                             "list/tuple has a size of {} but the row position "
+                             "argument has a size of {}")
+                            .format(len(value), len(rows)))
+
+                    for i, index in enumerate(rows):
+                        col.set_value(index, value[i])
+
+                else:
+                    # implements df[x, (y0, y1, ..., yn)] = v
+                    # and        df["x", (y0, y1, ..., yn)] = v
+                    for index in rows:
+                        col.set_value(index, value)
+
+            elif isinstance(rows, slice):
+                rows = rows.indices(arg.rows())
+                start = rows[0]
+                stop = rows[1]
+                step = rows[2]
+                col = arg.get_column(cols)
+                if isinstance(value, (list, tuple)):
+                    # implements df[x, y0:y1:y2] = (v0, v1, ..., vn)
+                    # and        df["x", y0:y1:y2] = (v0, v1, ..., vn)
+                    if ((stop - start) // step) != len(value):
+                        raise dataframe.DataFrameException(
+                            ("Invalid value argument. The specified "
+                             "list/tuple has a size of {} but the row position "
+                             "argument has a size of {}")
+                            .format(len(value), (stop - start) // step))
+
+                    i = 0
+                    for index in range(start, stop, step):
+                        col.set_value(index, value[i])
+                        i += 1
+
+                else:
+                    # implements df[x, y0:y1:y2] = v
+                    # and        df["x", y0:y1:y2] = v
+                    for index in range(start, stop, step):
+                        col.set_value(index, value)
+
+            else:
+                # invalid type for row position arg
+                raise dataframe.DataFrameException(
+                    ("Invalid row position type. "
+                     "Expected int or str but found {}").format(type(rows)))
+
+        elif isinstance(cols, (tuple, slice)):
+            # prefetch the selected columns as a DataFrame
+            if isinstance(cols, tuple):
+                cols_selected = arg.get_columns(cols=cols)
+            else: # is slice
+                cols_selected = (dataframe.NullableDataFrame(arg._internal_columns()[cols])
+                                 if arg.is_nullable()
+                                 else dataframe.DefaultDataFrame(arg._internal_columns()[cols]))
+
+            if isinstance(rows, int):
+                if rows < 0:
+                    if abs(rows) > arg.rows():
+                        raise dataframe.DataFrameException(
+                            "Invalid row index: {}".format(rows))
+
+                    rows = rows % arg.rows()
+
+                if isinstance(value, (tuple, list)):
+                    # implements df[(x0, x1, ..., xn), y] = [v0, v1, ..., vn]
+                    # and        df[x0:x1:x2, y] = [v0, v1, ..., vn]
+                    cols_selected.set_row(rows, value)
+                else:
+                    # implements df[(x0, x1, ..., xn), y] = v
+                    # and        df[x0:x1:x2, y] = v
+                    cols_selected.set_row(rows, [value] * cols_selected.columns())
+
+            elif isinstance(rows, tuple):
+                if isinstance(value, (list, tuple)):
+                    # implements df[(x0, x1, ..., xn), (y0, y1, ..., ym)] = [[ ], [ ], ..., [ ]]
+                    # and        df[x0:x1:x2, (y0, y1, ..., ym)] = [[ ], [ ], ..., [ ]]
+                    if len(value) == 0:
+                        raise dataframe.DataFrameException(
+                            ("Invalid value argument. The specified list/tuple "
+                             "of row values is empty"))
+
+                    if isinstance(value[0], (list, tuple)):
+                        if len(rows) != len(value):
+                            raise dataframe.DataFrameException(
+                                ("Invalid value argument. The specified list/tuple "
+                                 "has a size of {} but the row position argument "
+                                 "has a size of {}").format(len(value), len(rows)))
+
+                        for i, index in enumerate(rows):
+                            cols_selected.set_row(index, value[i])
+                    else:
+                        for index in rows:
+                            cols_selected.set_row(index, value)
+
+                elif isinstance(value, dataframe.DataFrame):
+                    # implements df[(x0, x1, ..., xn), (y0, y1, ..., ym)] = vDataFrame
+                    # and        df[x0:x1:x2, (y0, y1, ..., ym)] = vDataFrame
+                    if len(rows) != value.rows():
+                        rmsg1 = "rows" if value.rows() != 1 else "row"
+                        rmsg2 = "rows" if len(rows) != 1 else "row"
+                        raise dataframe.DataFrameException(
+                            ("Invalid value argument. The specified "
+                             "DataFrame has {} {} but the row position "
+                             "argument specified {} {}")
+                            .format(value.rows(), rmsg1, len(rows), rmsg2))
+
+                    for i, index in enumerate(rows):
+                        cols_selected.set_row(index, value.get_row(i))
+
+                else:
+                    # implements df[(x0, x1, ..., xn), (y0, y1, ..., ym)] = v
+                    # and        df[x0:x1:x2, (y0, y1, ..., ym)] = v
+                    value = [value] * cols_selected.columns()
+                    for index in rows:
+                        cols_selected.set_row(index, value)
+
+            elif isinstance(rows, slice):
+                rows = rows.indices(cols_selected.rows())
+                start = rows[0]
+                stop = rows[1]
+                step = rows[2]
+                if isinstance(value, (list, tuple)):
+                    # implements df[(x0, x1, ..., xn), y0:y1:y2] = [ .. ]
+                    # and        df[x0:x1:x2, y0:y1:y2] = [ .. ]
+                    for index in range(start, stop, step):
+                        cols_selected.set_row(index, value)
+
+                elif isinstance(value, dataframe.DataFrame):
+                    # implements df[(x0, x1, ..., xn), y0:y1:y2] = vDataFrame
+                    # and        df[x0:x1:x2, y0:y1:y2] = vDataFrame
+                    i = 0
+                    for index in range(start, stop, step):
+                        cols_selected.set_row(index, value.get_row(i))
+                        i += 1
+
+                else:
+                    # implements df[(x0, x1, ..., xn), y0:y1:y2] = v
+                    # and        df[x0:x1:x2, y0:y1:y2] = v
+                    value = [value] * cols_selected.columns()
+                    for index in range(start, stop, step):
+                        cols_selected.set_row(index, value)
+
+            elif isinstance(rows, str):
+                raise dataframe.DataFrameException(
+                    ("Invalid column position type. A replacement operation "
+                     "must only specify a single column "
+                     "but found {}").format(type(cols)))
+
+            else:
+                # invalid type for row position arg
+                raise dataframe.DataFrameException(
+                    ("Invalid row position type. "
+                     "Expected int or str but found {}").format(type(rows)))
+
+        else:
+            # invalid type for column position arg
+            raise dataframe.DataFrameException(
+                ("Invalid column position type. "
+                 "Expected int or str but found {}").format(type(cols)))
+
+    elif isinstance(position, int):
+        # check for negative column indices
+        if position < 0:
+            if abs(position) > arg.columns():
+                raise dataframe.DataFrameException(
+                    "Invalid column index: {}".format(position))
+
+            position = position % arg.columns()
+
+        # implements df[x] = Column
+        if position == arg.columns():
+            arg.add_column(value)
+        else:
+            arg.set_column(position, value)
+    elif isinstance(position, str):
+        # and        df["x"] = Column
+        arg.set_column(position, value)
+    else:
+        # invalid type for entire position arg
+        raise dataframe.DataFrameException(
+            ("Invalid position type. "
+             "Expected int or str but "
+             "found {}").format(type(position)))

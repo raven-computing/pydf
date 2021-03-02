@@ -4,7 +4,8 @@ init-hook='import sys; sys.path.append(".")'
 [MESSAGES CONTROL]
 
 # Disable cyclic import warning. Not applicable
-disable=R0401,
+disable=C0302,
+        R0401,
         R0904,
         no-else-return
 

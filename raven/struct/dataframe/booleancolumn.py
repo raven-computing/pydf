@@ -82,10 +82,10 @@ class BooleanColumn(column.Column):
                 ("Invalid argument. "
                  "BooleanColumn cannot use None values"))
 
-        if not isinstance(value, bool) and not isinstance(value, np.bool):
+        if not isinstance(value, (bool, np.bool, np.bool_)):
             raise dataframe.DataFrameException(
                 ("Invalid argument. Expected "
-                 "boolean (bool) but found {}".format(type(value))))
+                 "boolean (bool) but found {}").format(type(value)))
 
     def get_value(self, index):
         """Gets the boolean value at the specified index
@@ -280,8 +280,10 @@ class NullableBooleanColumn(column.Column):
 
     def _check_type(self, value):
         if value is not None:
-            if not isinstance(value, bool) and not isinstance(value, np.bool):
-                raise dataframe.DataFrameException("Is not boolean")
+            if not isinstance(value, (bool, np.bool, np.bool_)):
+                raise dataframe.DataFrameException(
+                    ("Invalid argument. Expected "
+                     "boolean (bool) but found {}").format(type(value)))
 
     def get_value(self, index):
         """Gets the boolean value at the specified index

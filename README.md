@@ -1,4 +1,4 @@
-# Pydf: An Implementation of the DataFrame specification in Python
+# Pydf: An Implementation of the DataFrame Specification in Python
 
 This is the official implementation of the DataFrame specification provided by Raven Computing.
 
@@ -48,6 +48,8 @@ Internally, this library uses [Numpy](https://github.com/numpy/numpy) for array 
 ## Documentation
 
 The unified documentation is available [here](https://www.raven-computing.com/docs/dataframe?language=python).
+
+Additional features implemented in Python are documented in the [Wiki](https://github.com/raven-computing/pydf/wiki).
 
 ## Development
 

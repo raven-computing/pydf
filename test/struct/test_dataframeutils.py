@@ -43,7 +43,7 @@ from raven.struct.dataframe import (DataFrame,
                                     NullableBooleanColumn,
                                     NullableBinaryColumn)
 
-# pylint: disable=too-many-lines
+# pylint: disable=too-many-lines, too-many-branches
 # pylint: disable=missing-function-docstring
 # pylint: disable=consider-using-enumerate, invalid-name
 

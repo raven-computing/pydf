@@ -3636,9 +3636,6 @@ class DataFrame(ABC):
         Returns:
             A string providing information describing this DataFrame
         """
-        if self.__columns is None:
-            return "uninitialized DataFrame instance"
-
         s = ""
         s += "Type:    "
         s += "Nullable" if self.is_nullable() else "Default"
@@ -3650,6 +3647,10 @@ class DataFrame(ABC):
         s += "Rows:    "
         s += str(self.rows())
         s += "\n"
+
+        if self.__columns is None:
+            return s
+
         types = DefaultDataFrame(
             stringcolumn.StringColumn("column", cols),
             stringcolumn.StringColumn("type", cols),
@@ -3935,7 +3936,7 @@ class DataFrame(ABC):
         for i in range(len(self.__columns)):
             try:
                 self.__columns[i]._check_type(row[i])
-            except DataFrameException:
+            except DataFrameException as ex:
                 s = ("'{}'".format(self.__columns[i]._name)
                      if (self.__columns[i]._name is not None)
                      else "at index {}".format(i))
@@ -3943,7 +3944,7 @@ class DataFrame(ABC):
                 raise DataFrameException(
                     ("Invalid row item type at position {} for "
                      "column {}. Expected {} but found {}")
-                    .format(i, s, self.__columns[i].type_name(), type(row[i])))
+                    .format(i, s, self.__columns[i].type_name(), type(row[i]))) from ex
 
     def _enforce_name(self, col):
         """Enforces that all requirements are met in order to access a
@@ -4065,6 +4066,7 @@ class DataFrame(ABC):
 
     def _internal_hash_code(self):
         """Internally used hash method."""
+        self.flush()
         h = 0
         mod = 2**64
         names = self.get_column_names()
@@ -5189,7 +5191,7 @@ class DataFrame(ABC):
         If the specified file path denotes a single DataFrame file, then that DataFrame is
         read and returned as a single DataFrame instance. If the specified file path denotes
         a directory, then all DataFrame files in that directory are read, i.e. all files
-        ending with a '.df' fil extension, and a dict is returned mapping all encountered
+        ending with a '.df' file extension, and a dict is returned mapping all encountered
         file names (without the '.df' extension) to the corresponding DataFrame instance read.
 
         Args:
@@ -5388,7 +5390,7 @@ class DefaultDataFrame(DataFrame):
                 columns = columns[0]
 
         columns = list(columns)
-        super(DefaultDataFrame, self).__init__(is_nullable=False, columns=columns)
+        super().__init__(is_nullable=False, columns=columns)
 
 
 class NullableDataFrame(DataFrame):
@@ -5421,7 +5423,7 @@ class NullableDataFrame(DataFrame):
                 columns = columns[0]
 
         columns = list(columns)
-        super(NullableDataFrame, self).__init__(is_nullable=True, columns=columns)
+        super().__init__(is_nullable=True, columns=columns)
 
 class Iterator:
     """An iterator over a DataFrame."""

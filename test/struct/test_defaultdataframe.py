@@ -35,8 +35,8 @@ from raven.struct.dataframe.charcolumn import CharColumn
 from raven.struct.dataframe.booleancolumn import BooleanColumn
 from raven.struct.dataframe.binarycolumn import BinaryColumn
 
-# pylint: disable=too-many-lines
-# pylint: disable=bad-whitespace, missing-function-docstring
+# pylint: disable=too-many-lines, too-many-statements
+# pylint: disable=missing-function-docstring
 # pylint: disable=consider-using-enumerate, invalid-name
 
 class TestDefaultDataFrame(unittest.TestCase):
@@ -2300,7 +2300,7 @@ class TestDefaultDataFrame(unittest.TestCase):
 
     def test_convert_from_booleancolumn(self):
         self.df.add_column(BooleanColumn("data"))
-        self.df.replace("data", replacement=lambda i, v: False if i % 2 == 0 else True)
+        self.df.replace("data", replacement=lambda i, v: i % 2 == 0)
         for _, code in enumerate(self.column_types):
             df2 = self.df.clone().convert("data", code)
             df2 = df2.convert("data", self.df.get_column("data").type_code())
@@ -3504,7 +3504,7 @@ class TestDefaultDataFrame(unittest.TestCase):
         test2.set_column_names(names)
         self.assertTrue(test1.equals(test2), "Equals method should return true")
         self.assertTrue(test1.hash_code() == test2.hash_code(),
-                        "HashCode method should return the same hash code")
+                        "Hash_code() method should return the same hash code")
 
         self.assertTrue(test1 == test2, "DataFrames should be equal")
         self.assertTrue(hash(test1) == hash(test2), "Hash code should be equal")
@@ -3513,6 +3513,53 @@ class TestDefaultDataFrame(unittest.TestCase):
         test1.set_byte("BYTE", 2, 42)
         self.assertFalse(test1.equals(test2), "Equals method should return false")
         self.assertFalse(test1 == test2, "DataFrames should not be equal")
+
+    def test_equals_hash_code_contract_after_io(self):
+        test1 = self.df.clone()
+        test2 = test1
+        self.assertTrue(test1.equals(test2), "DataFrames should be equal")
+        self.assertTrue(test1.hash_code() == test2.hash_code(),
+                        "DataFrames should have the same hash code")
+
+        self.assertTrue(test1 == test2, "DataFrames should be equal")
+        self.assertTrue(hash(test1) == hash(test2),
+                        "DataFrames should have the same hash code")
+
+        test1 = self.df.clone()
+        test2 = self.df.clone()
+        self.assertTrue(test1.equals(test2), "DataFrames should be equal")
+        self.assertTrue(test1.hash_code() == test2.hash_code(),
+                        "DataFrames should have the same hash code")
+
+        self.assertTrue(test1 == test2, "DataFrames should be equal")
+        self.assertTrue(hash(test1) == hash(test2),
+                        "DataFrames should have the same hash code")
+
+        test1 = self.df.clone()
+        test2 = DataFrame.deserialize(DataFrame.serialize(test1))
+        self.assertTrue(test1.equals(test2), "DataFrames should be equal")
+        self.assertTrue(test1.hash_code() == test2.hash_code(),
+                        "DataFrames should have the same hash code")
+
+        self.assertTrue(test1 == test2, "DataFrames should be equal")
+        self.assertTrue(hash(test1) == hash(test2),
+                        "DataFrames should have the same hash code")
+
+        test1 = self.df.clone().remove_rows(from_index=3, to_index=5)
+        test2 = DataFrame.deserialize(
+            DataFrame.serialize(
+                self.df.clone().remove_rows(from_index=3, to_index=5)))
+
+        test2.flush()
+        self.assertTrue(test1.capacity() != test2.capacity())
+        self.assertTrue(test1.hash_code() == test2.hash_code(),
+                        "DataFrames should have the same hash code")
+
+        self.assertTrue(hash(test1) == hash(test2),
+                        "DataFrames should have the same hash code")
+
+        self.assertTrue(test1.equals(test2), "DataFrames should be equal")
+        self.assertTrue(test1 == test2, "DataFrames should be equal")
 
 
 

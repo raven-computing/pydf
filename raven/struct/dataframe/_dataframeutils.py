@@ -30,6 +30,7 @@ import raven.struct.dataframe.stringcolumn as stringcolumn
 import raven.struct.dataframe.charcolumn as charcolumn
 import raven.struct.dataframe.booleancolumn as booleancolumn
 import raven.struct.dataframe.binarycolumn as binarycolumn
+import raven.struct.dataframe._columnutils as columnutils
 
 # pylint: disable=C0103, R1702, R1705, R0911, R0912, R0914, R0915, W0212
 
@@ -100,10 +101,7 @@ def is_numeric_fp(col):
         a FloatColumn, NullableFloatColumn, DoubleColumn,
         NullableDoubleColumn
     """
-    return col.type_code() in (floatcolumn.FloatColumn.TYPE_CODE,
-                               floatcolumn.NullableFloatColumn.TYPE_CODE,
-                               doublecolumn.DoubleColumn.TYPE_CODE,
-                               doublecolumn.NullableDoubleColumn.TYPE_CODE)
+    return columnutils.is_numeric_fp(col)
 
 def merge(*dataframes):
     """Merges all given DataFrame instances into one DataFrame.
@@ -388,28 +386,7 @@ def column_from_typename(typename):
         A Column instance from the specified type name,
         or None if the argument is not a valid type name
     """
-    if typename == "byte":
-        return bytecolumn.ByteColumn()
-    elif typename == "short":
-        return shortcolumn.ShortColumn()
-    elif typename in ("int", "integer"):
-        return intcolumn.IntColumn()
-    elif typename == "long":
-        return longcolumn.LongColumn()
-    elif typename in ("string", "str"):
-        return stringcolumn.StringColumn()
-    elif typename == "float":
-        return floatcolumn.FloatColumn()
-    elif typename == "double":
-        return doublecolumn.DoubleColumn()
-    elif typename in ("char", "character"):
-        return charcolumn.CharColumn()
-    elif typename in ("boolean", "bool"):
-        return booleancolumn.BooleanColumn()
-    elif typename == "binary":
-        return binarycolumn.BinaryColumn()
-    else:
-        return None
+    return columnutils.column_from_typename(typename)
 
 def join(df1, col1, df2, col2):
     """Combines all rows from the specified DataFrames which have matching

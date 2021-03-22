@@ -152,7 +152,7 @@ def read_file(filepath):
     If the specified file path denotes a single DataFrame file, then that DataFrame is
     read and returned as a single DataFrame instance. If the specified file path denotes
     a directory, then all DataFrame files in that directory are read, i.e. all files
-    ending with a '.df' fil extension, and a dict is returned mapping all encountered
+    ending with a '.df' file extension, and a dict is returned mapping all encountered
     file names (without the '.df' extension) to the corresponding DataFrame instance read.
 
     Args:

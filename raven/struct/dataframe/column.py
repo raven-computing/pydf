@@ -22,7 +22,7 @@ import raven.struct.dataframe.core as dataframe
 
 __author__ = "Phil Gaiser"
 
-# pylint: disable=C0103, R1705, R0911, R0912, R0912
+# pylint: disable=C0103, R1705, R0911, R0912
 
 class Column(ABC):
     """A labeled Column to be used in a DataFrame.
@@ -410,7 +410,7 @@ class Column(ABC):
         when computing the hash code.
 
         Please note that the hash value from the internally
-        used numpy array is computed by calling the tobytes() method
+        used numpy array is computed by calling the tolist() method
         of the underlying array. This creates a temporary copy of the
         content of the numpy array.
 
@@ -420,7 +420,7 @@ class Column(ABC):
         return hash(self)
 
     def __hash__(self):
-        return hash((self._name, self._values.tobytes()))
+        return hash((self._name, tuple(self._values.tolist())))
 
     def __eq__(self, other):
         return self.equals(other)
@@ -468,66 +468,11 @@ class Column(ABC):
             type_code: The unique type code of the Column to create
             length: The initial length of the Column to create. Must be an int
         Returns:
-            An empty Column of the specified type and length or None if
+            A Column of the specified type and length or None if
             the specified type code is unknown
         """
-        if not isinstance(length, int):
-            raise ValueError("Invalid length argument. Must be an int")
-
-        import raven.struct.dataframe.bytecolumn as bytecolumn
-        import raven.struct.dataframe.shortcolumn as shortcolumn
-        import raven.struct.dataframe.intcolumn as intcolumn
-        import raven.struct.dataframe.longcolumn as longcolumn
-        import raven.struct.dataframe.floatcolumn as floatcolumn
-        import raven.struct.dataframe.doublecolumn as doublecolumn
-        import raven.struct.dataframe.stringcolumn as stringcolumn
-        import raven.struct.dataframe.charcolumn as charcolumn
-        import raven.struct.dataframe.booleancolumn as booleancolumn
-        import raven.struct.dataframe.binarycolumn as binarycolumn
-
-        if type_code == bytecolumn.ByteColumn.TYPE_CODE:
-            return bytecolumn.ByteColumn(values=length)
-        if type_code == shortcolumn.ShortColumn.TYPE_CODE:
-            return shortcolumn.ShortColumn(values=length)
-        if type_code == intcolumn.IntColumn.TYPE_CODE:
-            return intcolumn.IntColumn(values=length)
-        if type_code == longcolumn.LongColumn.TYPE_CODE:
-            return longcolumn.LongColumn(values=length)
-        if type_code == stringcolumn.StringColumn.TYPE_CODE:
-            return stringcolumn.StringColumn(values=length)
-        if type_code == floatcolumn.FloatColumn.TYPE_CODE:
-            return floatcolumn.FloatColumn(values=length)
-        if type_code == doublecolumn.DoubleColumn.TYPE_CODE:
-            return doublecolumn.DoubleColumn(values=length)
-        if type_code == charcolumn.CharColumn.TYPE_CODE:
-            return charcolumn.CharColumn(values=length)
-        if type_code == booleancolumn.BooleanColumn.TYPE_CODE:
-            return booleancolumn.BooleanColumn(values=length)
-        if type_code == binarycolumn.BinaryColumn.TYPE_CODE:
-            return binarycolumn.BinaryColumn(values=length)
-        if type_code == bytecolumn.NullableByteColumn.TYPE_CODE:
-            return bytecolumn.NullableByteColumn(values=length)
-        if type_code == shortcolumn.NullableShortColumn.TYPE_CODE:
-            return shortcolumn.NullableShortColumn(values=length)
-        if type_code == intcolumn.NullableIntColumn.TYPE_CODE:
-            return intcolumn.NullableIntColumn(values=length)
-        if type_code == longcolumn.NullableLongColumn.TYPE_CODE:
-            return longcolumn.NullableLongColumn(values=length)
-        if type_code == stringcolumn.NullableStringColumn.TYPE_CODE:
-            return stringcolumn.NullableStringColumn(values=length)
-        if type_code == floatcolumn.NullableFloatColumn.TYPE_CODE:
-            return floatcolumn.NullableFloatColumn(values=length)
-        if type_code == doublecolumn.NullableDoubleColumn.TYPE_CODE:
-            return doublecolumn.NullableDoubleColumn(values=length)
-        if type_code == charcolumn.NullableCharColumn.TYPE_CODE:
-            return charcolumn.NullableCharColumn(values=length)
-        if type_code == booleancolumn.NullableBooleanColumn.TYPE_CODE:
-            return booleancolumn.NullableBooleanColumn(values=length)
-        if type_code == binarycolumn.NullableBinaryColumn.TYPE_CODE:
-            return binarycolumn.NullableBinaryColumn(values=length)
-
-        # Default value for unknown type code
-        return None
+        import raven.struct.dataframe._columnutils as utils
+        return utils.column_of_type(type_code, length)
 
     def _check_bounds(self, index):
         """Checks array bounds for the specified index.

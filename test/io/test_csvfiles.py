@@ -26,7 +26,7 @@ from raven.struct.dataframe import (DataFrame,
                                     DefaultDataFrame,
                                     NullableDataFrame)
 
-# pylint: disable=invalid-name, missing-function-docstring, bad-whitespace
+# pylint: disable=invalid-name, missing-function-docstring
 
 class TestCSV(unittest.TestCase):
     """Tests reading and writing of CSV files."""

@@ -36,7 +36,31 @@ import raven.struct.dataframe.column as column
 # pylint: disable=invalid-name, missing-function-docstring
 
 class TestColumn(unittest.TestCase):
-    """Tests for Column construction and static functions."""
+    """Tests for Column construction, methods and static functions."""
+
+    def setUp(self):
+
+        self.all_column_classes = [
+            ByteColumn,
+            ShortColumn,
+            IntColumn,
+            LongColumn,
+            FloatColumn,
+            DoubleColumn,
+            StringColumn,
+            CharColumn,
+            BooleanColumn,
+            BinaryColumn,
+            NullableByteColumn,
+            NullableShortColumn,
+            NullableIntColumn,
+            NullableLongColumn,
+            NullableFloatColumn,
+            NullableDoubleColumn,
+            NullableStringColumn,
+            NullableCharColumn,
+            NullableBooleanColumn,
+            NullableBinaryColumn]
 
 
 
@@ -1127,6 +1151,178 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col[3] is None)
         col[4] = None
         self.assertTrue(col[4] is None)
+
+
+
+    #********************************************#
+    #              Column Conversion             #
+    #********************************************#
+
+
+
+    def test_convert_byte_column(self):
+        col = ByteColumn("col", [11, 22, 33, 44, 55])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_short_column(self):
+        col = ShortColumn("col", [11, 22, 33, 44, 55])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_int_column(self):
+        col = IntColumn("col", [11, 22, 33, 44, 55])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_long_column(self):
+        col = LongColumn("col", [11, 22, 33, 44, 55])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_float_column(self):
+        col = FloatColumn("col", [11.0, 22.0, 33.0, 44.0, 55.0])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_double_column(self):
+        col = DoubleColumn("col", [11.0, 22.0, 33.0, 44.0, 55.0])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_string_column(self):
+        col = StringColumn("col", ["1", "0", "0", "1", "1"])
+        col_hex = StringColumn("col", ["11aa", "22bb", "33cc", "ff", "5566ef"])
+        for col_class in self.all_column_classes:
+            if col_class.TYPE_CODE in (BinaryColumn.TYPE_CODE,
+                                       NullableBinaryColumn.TYPE_CODE):
+
+                converted = col_hex.convert_to(col_class.TYPE_CODE)
+            else:
+                converted = col.convert_to(col_class.TYPE_CODE)
+
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_char_column(self):
+        col = CharColumn("col", ["1", "0", "1", "0", "1"])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_boolean_column(self):
+        col = BooleanColumn("col", [True, False, True, False, True])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_binary_column(self):
+        col_int = BinaryColumn("col", [bytearray.fromhex("0001"),
+                                       bytearray.fromhex("0002"),
+                                       bytearray.fromhex("03"),
+                                       bytearray.fromhex("0004"),
+                                       bytearray.fromhex("05")])
+
+        col_char = BinaryColumn("col", [bytearray.fromhex("41"),
+                                        bytearray.fromhex("42"),
+                                        bytearray.fromhex("43"),
+                                        bytearray.fromhex("44"),
+                                        bytearray.fromhex("45")])
+
+        for col_class in self.all_column_classes:
+            if col_class.TYPE_CODE in (CharColumn.TYPE_CODE, NullableCharColumn.TYPE_CODE):
+                converted = col_char.convert_to(col_class.TYPE_CODE)
+            else:
+                converted = col_int.convert_to(col_class.TYPE_CODE)
+
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_byte_column(self):
+        col = NullableByteColumn("col", [11, None, 33, None, 55])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_short_column(self):
+        col = NullableShortColumn("col", [11, None, 33, None, 55])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_int_column(self):
+        col = NullableIntColumn("col", [11, None, 33, None, 55])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_long_column(self):
+        col = NullableLongColumn("col", [11, None, 33, None, 55])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_float_column(self):
+        col = NullableFloatColumn("col", [11.0, None, 33.0, None, 55.0])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_double_column(self):
+        col = NullableDoubleColumn("col", [11.0, None, 33.0, None, 55.0])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_string_column(self):
+        col = NullableStringColumn("col", ["1", None, "0", None, "1"])
+        col_hex = NullableStringColumn("col", ["11aa", None, "33cc", None, "ef"])
+        for col_class in self.all_column_classes:
+            if col_class.TYPE_CODE in (BinaryColumn.TYPE_CODE,
+                                       NullableBinaryColumn.TYPE_CODE):
+
+                converted = col_hex.convert_to(col_class.TYPE_CODE)
+            else:
+                converted = col.convert_to(col_class.TYPE_CODE)
+
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_char_column(self):
+        col = NullableCharColumn("col", ["1", None, "1", None, "1"])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_boolean_column(self):
+        col = NullableBooleanColumn("col", [True, None, False, None, True])
+        for col_class in self.all_column_classes:
+            converted = col.convert_to(col_class.TYPE_CODE)
+            self.assertTrue(isinstance(converted, col_class))
+
+    def test_convert_nullable_binary_column(self):
+        col_int = NullableBinaryColumn("col", [bytearray.fromhex("0001"),
+                                               None,
+                                               bytearray.fromhex("03"),
+                                               None,
+                                               bytearray.fromhex("05")])
+
+        col_char = NullableBinaryColumn("col", [bytearray.fromhex("41"),
+                                                None,
+                                                bytearray.fromhex("43"),
+                                                None,
+                                                bytearray.fromhex("45")])
+
+        for col_class in self.all_column_classes:
+            if col_class.TYPE_CODE in (CharColumn.TYPE_CODE, NullableCharColumn.TYPE_CODE):
+                converted = col_char.convert_to(col_class.TYPE_CODE)
+            else:
+                converted = col_int.convert_to(col_class.TYPE_CODE)
+
+            self.assertTrue(isinstance(converted, col_class))
 
 
 

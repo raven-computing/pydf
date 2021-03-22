@@ -19,12 +19,12 @@ from setuptools import setup, find_namespace_packages
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(PROJECT_ROOT, "README.md")) as f:
+with open(os.path.join(PROJECT_ROOT, "pypi.md")) as f:
     README = f.read()
 
 setup(
     name="raven-pydf",
-    version="1.1.0",
+    version="1.1.1",
     description="An implementation of the DataFrame specification in Python",
     long_description=README,
     long_description_content_type="text/markdown",

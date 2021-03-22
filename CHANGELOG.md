@@ -1,3 +1,14 @@
+#### 1.1.1
+* Changed info string to standard representation for uninitialized DataFrames in info() method.
+* Changed hashable internal representation of numpy arrays in all Columns by calling tolist() instead of tobytes() function.
+* Changed hash code computation of (Nullable)BinaryColumns by taking hex string representation of bytearray content.
+* Changed super calls in DefaultDataFrame and NullableDataFrame classes and removed function arguments.
+* Fixed differing hash codes for some equal NullableDataFrames.
+* Fixed some column conversion errors.
+* Improved call stack representation involving DataFrameExceptions by accurately propagating nested Exceptions.
+* Refactored column implementations and moved import dependencies of columns to \_columnutils module.
+* Upgraded pylint version to 2.7.2 in requirements.txt
+
 #### 1.1.0
 * Added []-operator implementation via getitem and setitem functions.
 * Added the ability to read and write multiple DataFrame files in one directory with a single call to read() and write() functions

@@ -1,3 +1,11 @@
+#### 1.1.2
+* Changed loop in remove\_column\_names() method.
+* Fixed incorrect reading of CSV files with blank (empty) lines.
+* Improved performance of get\_row() method.
+* Improved performance of get\_rows() method.
+* Improved performance of set\_row() method.
+* Improved performance of add\_row() method.
+
 #### 1.1.1
 * Changed info string to standard representation for uninitialized DataFrames in info() method.
 * Changed hashable internal representation of numpy arrays in all Columns by calling tolist() instead of tobytes() function.

@@ -789,8 +789,8 @@ class DataFrame(ABC):
             This DataFrame instance
         """
         self.__names = None
-        for i in range(len(self.__columns)):
-            self.__columns[i]._name = None
+        for col in self.__columns:
+            col._name = None
 
         return self
 
@@ -856,11 +856,7 @@ class DataFrame(ABC):
         if index >= self.__next or index < 0:
             raise DataFrameException("Invalid row index: {}".format(index))
 
-        row = []
-        for col in self.__columns:
-            row.append(col.get_value(index))
-
-        return row
+        return [col[index] for col in self.__columns]
 
     def get_rows(self, from_index=None, to_index=None):
         """Gets the rows located in the specified range.
@@ -914,14 +910,17 @@ class DataFrame(ABC):
                         if from_index < 0 or from_index >= self.__next
                         else to_index))
 
-        df = NullableDataFrame() if self.__is_nullable else DefaultDataFrame()
         length = to_index - from_index
-        for _, col in enumerate(self.__columns):
-            c = raven.struct.dataframe.column.Column.of_type(col.type_code(), length)
-            for i in range(from_index, to_index, 1):
-                c.set_value(i - from_index, col.get_value(i))
+        #preallocate columns
+        cols = [raven.struct.dataframe.column.Column.of_type(col.type_code(), length)
+                for col in self.__columns]
 
-            df.add_column(c)
+        df = NullableDataFrame(cols) if self.__is_nullable else DefaultDataFrame(cols)
+        for i, col in enumerate(self.__columns):
+            array1 = col.as_array()
+            array2 = cols[i].as_array()
+            for j in range(from_index, to_index, 1):
+                array2[j - from_index] = array1[j]
 
         if self.__names is not None:
             df.set_column_names(self.get_column_names())
@@ -954,8 +953,8 @@ class DataFrame(ABC):
             raise DataFrameException("Invalid row index: {}".format(index))
 
         self._enforce_types(row)
-        for i in range(len(self.__columns)):
-            self.__columns[i].set_value(index, row[i])
+        for i, col in enumerate(self.__columns):
+            col[index] = row[i]
 
         return self
 
@@ -978,8 +977,8 @@ class DataFrame(ABC):
         if self.__next >= self.__columns[0].capacity():
             self._resize()
 
-        for i in range(len(self.__columns)):
-            self.__columns[i].set_value(self.__next, row[i])
+        for i, col in enumerate(self.__columns):
+            col[self.__next] = row[i]
 
         self.__next += 1
         return self

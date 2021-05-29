@@ -221,6 +221,7 @@ def _df_from_csv_format(buffer, separator, header, types):
 
             for _ in range(line_index, len(buffer), 1):
                 if not buffer[line_index]: # skip empty lines
+                    line_index += 1
                     continue
 
                 blocks = pattern.split(_process(buffer[line_index], separator), 0)
@@ -260,6 +261,7 @@ def _df_from_csv_format(buffer, separator, header, types):
             line_index += 1
             for _ in range(line_index, len(buffer), 1):
                 if not buffer[line_index]: # skip empty lines
+                    line_index += 1
                     continue
 
                 blocks = pattern.split(_process(buffer[line_index], separator), 0)

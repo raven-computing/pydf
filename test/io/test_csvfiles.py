@@ -31,10 +31,11 @@ from raven.struct.dataframe import (DataFrame,
 class TestCSV(unittest.TestCase):
     """Tests reading and writing of CSV files."""
 
-    FILE_DEFAULT   = os.path.join(os.path.dirname(__file__), "test.csv")
-    FILE_NULLABLE  = os.path.join(os.path.dirname(__file__), "test_nullable.csv")
-    FILE_NOHEADER  = os.path.join(os.path.dirname(__file__), "test_noheader.csv")
-    FILE_MALFORMED = os.path.join(os.path.dirname(__file__), "test_nullable_malformed.csv")
+    FILE_DEFAULT       = os.path.join(os.path.dirname(__file__), "test.csv")
+    FILE_NULLABLE      = os.path.join(os.path.dirname(__file__), "test_nullable.csv")
+    FILE_NOHEADER      = os.path.join(os.path.dirname(__file__), "test_noheader.csv")
+    FILE_MALFORMED     = os.path.join(os.path.dirname(__file__), "test_nullable_malformed.csv")
+    FILE_EMPTY_LINES   = os.path.join(os.path.dirname(__file__), "test_empty_lines.csv")
 
     DF_DEFAULT             = None
     DF_DEFAULT_AS_STRING   = None
@@ -42,6 +43,7 @@ class TestCSV(unittest.TestCase):
     DF_NULLABLE_AS_STRING  = None
     DF_MALFORMED           = None
     DF_MALFORMED_AS_STRING = None
+    DF_EMPTY_LINES         = None
 
     def setUp(self):
         TestCSV.DF_DEFAULT = DefaultDataFrame(
@@ -76,6 +78,11 @@ class TestCSV(unittest.TestCase):
             DataFrame.NullableStringColumn("AttrC", [None, "2.2", None, "4.4"]),
             DataFrame.NullableStringColumn("AttrD", [None, None, None, None]))
 
+        TestCSV.DF_EMPTY_LINES = DefaultDataFrame(
+            DataFrame.IntColumn("AttrA", [1, 2, 3, 4, 5, 6, 7]),
+            DataFrame.DoubleColumn("AttrB", [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7]),
+            DataFrame.StringColumn("AttrC", ["C1", "C2", "C,3", "C4", "C5", "C6", "C7"]))
+
 
     def test_file_read(self):
         if not os.path.exists(TestCSV.FILE_DEFAULT):
@@ -91,7 +98,7 @@ class TestCSV(unittest.TestCase):
         df = csv.read(TestCSV.FILE_DEFAULT, types=("int", "double", "string"))
         self.assertTrue(TestCSV.DF_DEFAULT == df, "DataFrames do not match")
 
-    def test_file_read__no_header(self):
+    def test_file_read_no_header(self):
         if not os.path.exists(TestCSV.FILE_DEFAULT):
             self.fail("Test resource '{}' was not found".format(TestCSV.FILE_NOHEADER))
 
@@ -137,6 +144,24 @@ class TestCSV(unittest.TestCase):
 
         df = csv.read(TestCSV.FILE_MALFORMED, types=("int", "double", "double", "string"))
         self.assertTrue(TestCSV.DF_MALFORMED == df, "DataFrames do not match")
+
+    def test_file_read_with_types_empty_lines(self):
+        if not os.path.exists(TestCSV.FILE_EMPTY_LINES):
+            self.fail("Test resource '{}' was not found".format(TestCSV.FILE_EMPTY_LINES))
+
+        df = csv.read(TestCSV.FILE_EMPTY_LINES, types=("int", "double", "string"))
+        self.assertTrue(TestCSV.DF_EMPTY_LINES == df, "DataFrames do not match")
+
+    def test_file_read_empty_lines(self):
+        if not os.path.exists(TestCSV.FILE_EMPTY_LINES):
+            self.fail("Test resource '{}' was not found".format(TestCSV.FILE_EMPTY_LINES))
+
+        df = csv.read(TestCSV.FILE_EMPTY_LINES)
+        truth = TestCSV.DF_EMPTY_LINES.clone()
+        for col in truth:
+            truth.convert(col.get_name(), "string")
+
+        self.assertTrue(truth == df, "DataFrames do not match")
 
 
 if __name__ == "__main__":

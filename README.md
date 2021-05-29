@@ -33,7 +33,7 @@ from raven.struct.dataframe import (DefaultDataFrame,
 # create a DataFrame with 3 columns and 3 rows
 df = DefaultDataFrame(
         IntColumn("A", [1, 2, 3]),
-        FloatColumn("B", [4.4, 5.5, 6.6])
+        FloatColumn("B", [4.4, 5.5, 6.6]),
         StringColumn("C", ["cat", "dog", "horse"]))
 
 print(df)

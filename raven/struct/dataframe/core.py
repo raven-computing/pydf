@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Raven Computing
+# Copyright (C) 2022 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -2410,7 +2410,7 @@ class DataFrame(ABC):
             return set()
 
         column = self.__columns[col]
-        values = column.as_array()
+        values = column.as_array()[0:self.__next]
         if self.__is_nullable:
             values = values[values != None]
 
@@ -3282,10 +3282,12 @@ class DataFrame(ABC):
             raise DataFrameException(("Unable to compute absolutes. "
                                       "Column {} is not numeric").format(msg))
 
-        values = c.as_array()
-        for i in range(0, self.__next, 1):
-            if values[i] is not None:
-                values[i] = abs(values[i])
+        values = c.as_array()[0:self.__next]
+        if self.__is_nullable:
+            mask = values != None
+            np.absolute(values, out=values, where=mask)
+        else:
+            np.absolute(values, out=values)
 
         return self
 
@@ -3321,11 +3323,13 @@ class DataFrame(ABC):
             raise DataFrameException(("Unable to compute ceil values. "
                                       "Column {} is not numeric").format(msg))
 
-        values = c.as_array()
+        values = c.as_array()[0:self.__next]
         if dataframeutils.is_numeric_fp(c):
-            for i in range(0, self.__next, 1):
-                if values[i] is not None:
-                    values[i] = float(np.ceil(values[i]))
+            if self.__is_nullable:
+                mask = values != None
+                np.ceil(values, out=values, where=mask)
+            else:
+                np.ceil(values, out=values)
 
         return self
 
@@ -3363,9 +3367,11 @@ class DataFrame(ABC):
 
         values = c.as_array()
         if dataframeutils.is_numeric_fp(c):
-            for i in range(0, self.__next, 1):
-                if values[i] is not None:
-                    values[i] = float(np.floor(values[i]))
+            if self.__is_nullable:
+                mask = values != None
+                np.floor(values, out=values, where=mask)
+            else:
+                np.floor(values, out=values)
 
         return self
 
@@ -3922,7 +3928,7 @@ class DataFrame(ABC):
         Column element type in the DataFrame.
 
         Args:
-            row: The row to check against type missmatches. Must be a list
+            row: The row to check against type mismatches. Must be a list
 
         Raises:
             DataFrameException: If a row item has an invalid type
@@ -5292,7 +5298,7 @@ class DataFrame(ABC):
         For example:
 
           >>> from raven.struct.dataframe import DataFrame
-          >>> df = DataFrame.read_csv("myfile.csv", types=("string", int", "float", "boolean"))
+          >>> df = DataFrame.read_csv("myfile.csv", types=("string", "int", "float", "boolean"))
 
         The above code will read a CSV-file named 'myfile.csv' and return a DataFrame
         with the first Column as a StringColumn, the second Column as an IntColumn,

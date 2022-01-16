@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Raven Computing
+# Copyright (C) 2022 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -947,6 +947,10 @@ def setitem_impl(arg, position, value):
 
                     rows = rows % arg.rows()
 
+                if rows >= arg.rows():
+                    raise dataframe.DataFrameException(
+                            "Invalid row index: {}".format(rows))
+
                 if isinstance(value, (tuple, list)):
                     # implements df[(x0, x1, ..., xn), y] = [v0, v1, ..., vn]
                     # and        df[x0:x1:x2, y] = [v0, v1, ..., vn]
@@ -965,6 +969,7 @@ def setitem_impl(arg, position, value):
                             ("Invalid value argument. The specified list/tuple "
                              "of row values is empty"))
 
+                    nrows = arg.rows() # cache the number of rows
                     if isinstance(value[0], (list, tuple)):
                         if len(rows) != len(value):
                             raise dataframe.DataFrameException(
@@ -973,9 +978,21 @@ def setitem_impl(arg, position, value):
                                  "has a size of {}").format(len(value), len(rows)))
 
                         for i, index in enumerate(rows):
+                            # safety bounds check
+                            if index >= nrows:
+                                raise dataframe.DataFrameException(
+                                    "Invalid row index within "
+                                    "specified sequence: {}".format(index))
+
                             cols_selected.set_row(index, value[i])
                     else:
                         for index in rows:
+                            # safety bounds check
+                            if index >= nrows:
+                                raise dataframe.DataFrameException(
+                                    "Invalid row index within "
+                                    "specified sequence: {}".format(index))
+
                             cols_selected.set_row(index, value)
 
                 elif isinstance(value, dataframe.DataFrame):

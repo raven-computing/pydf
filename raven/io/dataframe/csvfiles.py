@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Raven Computing
+# Copyright (C) 2022 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ def read(filepath, separator=",", header=True, encoding="utf-8", types=None):
     For example:
 
       >>> import raven.io.csvfiles as csv
-      >>> df = csv.read("myfile.csv", types=("string", int", "float", "boolean"))
+      >>> df = csv.read("myfile.csv", types=("string", "int", "float", "boolean"))
 
     The above code will read a CSV-file named 'myfile.csv' and return a DataFrame
     with the first Column as a StringColumn, the second Column as an IntColumn,

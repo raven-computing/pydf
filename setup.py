@@ -1,4 +1,4 @@
-# Copyright 2021 Raven Computing
+# Copyright 2022 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ with open(os.path.join(PROJECT_ROOT, "pypi.md")) as f:
 
 setup(
     name="raven-pydf",
-    version="1.1.2",
+    version="1.1.3",
     description="An implementation of the DataFrame specification in Python",
     long_description=README,
     long_description_content_type="text/markdown",

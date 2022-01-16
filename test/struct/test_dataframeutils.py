@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Raven Computing
+# Copyright (C) 2022 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -1455,6 +1455,18 @@ class TestDataFrameUtils(unittest.TestCase):
         self.nulldf[:, 2] = [7, 7, 7, None, "77", "G", 7.0, 7.0, None, None]
         self.assertTrue(self.nulldf == truth, "DataFrames do not match")
 
+    def test_setitem_add_single_row_exception(self):
+        df = self.df.clone()
+        df.add_row([4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        row = [6, 6, 6, 6, "66", "F", 6.0, 6.0, False, bytearray.fromhex("0066")]
+        cols = slice(None, None, None)
+        self.assertRaises(DataFrameException, df.__setitem__, (cols, df.rows()), row)
+
+        df = self.nulldf.clone()
+        df.add_row([4, None, 4, None, "42", "D", None, 4.0, True, None])
+        row = [6, None, 6, None, "66", "F", None, 6.0, False, None]
+        self.assertRaises(DataFrameException, df.__setitem__, (cols, df.rows()), row)
+
     def test_setitem_set_multiple_rows(self):
         self.df.add_rows(self.df)
         truth = self.df.clone()
@@ -1488,6 +1500,23 @@ class TestDataFrameUtils(unittest.TestCase):
         truth.set_row(4, [4, None, 4, None, "42", "D", None, 4.0, True, None])
         self.nulldf[:, ::2] = [4, None, 4, None, "42", "D", None, 4.0, True, None]
         self.assertTrue(self.nulldf == truth, "DataFrames do not match")
+
+    def test_setitem_set_multiple_rows_exception(self):
+        df = self.df.clone()
+        df.add_row([4, 4, 4, 4, "42", "D", 4.0, 4.0, True, bytearray.fromhex("0004")])
+        row = [6, 6, 6, 6, "66", "F", 6.0, 6.0, False, bytearray.fromhex("0066")]
+        cols = slice(None, None, None)
+        nrows = df.rows()
+        self.assertRaises(DataFrameException, df.__setitem__, (cols, (nrows-1, nrows)), row)
+
+        df = self.nulldf.clone()
+        df.add_row([4, None, 4, None, "42", "D", None, 4.0, True, None])
+        nrows = df.rows()
+        row = [
+            [6, None, 6, None, "66", "F", None, 6.0, False, None],
+            [7, None, 7, None, "77", "G", None, 7.0, True, None]]
+
+        self.assertRaises(DataFrameException, df.__setitem__, (cols, (nrows-1, nrows)), row)
 
     def test_setitem_set_single_row_with_specific_column(self):
         truth = self.df.clone()

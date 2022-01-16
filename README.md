@@ -27,16 +27,20 @@ Alternatively, you can import all concrete Column types directly, for example:
 ```python
 from raven.struct.dataframe import (DefaultDataFrame,
                                     IntColumn,
-                                    FloatColumn,
+                                    DoubleColumn,
                                     StringColumn)
 
 # create a DataFrame with 3 columns and 3 rows
 df = DefaultDataFrame(
         IntColumn("A", [1, 2, 3]),
-        FloatColumn("B", [4.4, 5.5, 6.6]),
+        DoubleColumn("B", [4.4, 5.5, 6.6]),
         StringColumn("C", ["cat", "dog", "horse"]))
 
 print(df)
+# _| A B   C
+# 0| 1 4.4 cat
+# 1| 2 5.5 dog
+# 2| 3 6.6 horse
 ```
 
 ## Compatibility

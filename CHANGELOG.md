@@ -1,3 +1,10 @@
+#### 1.1.3
+* Fixed erroneous setting of row items with \[\]-operator when the specified row index is out of bounds but within column capacity.
+* Fixed error resulting from inclusion of capacity buffer range in unique() method.
+* Improved performance of absolute() method.
+* Improved performance of ceil() method.
+* Improved performance of floor() method.
+
 #### 1.1.2
 * Changed loop in remove\_column\_names() method.
 * Fixed incorrect reading of CSV files with blank (empty) lines.

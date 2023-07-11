@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Raven Computing
+# Copyright (C) 2023 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class StringColumn(column.Column):
                 Must be a list or numpy array with dtype object, or an int
         """
         if values is None:
-            values = np.empty(0, dtype=np.object)
+            values = np.empty(0, dtype=object)
 
         if isinstance(values, list):
             for i, value in enumerate(values):
@@ -54,7 +54,7 @@ class StringColumn(column.Column):
                 if not value:
                     values[i] = StringColumn.DEFAULT_VALUE
 
-            values = np.array(values, dtype=np.object)
+            values = np.array(values, dtype=object)
 
         elif isinstance(values, np.ndarray):
             if values.dtype != "object":
@@ -72,7 +72,7 @@ class StringColumn(column.Column):
                     values[i] = StringColumn.DEFAULT_VALUE
 
         elif isinstance(values, int):
-            values = np.empty(values, dtype=np.object)
+            values = np.empty(values, dtype=object)
             for i in range(values.shape[0]):
                 values[i] = StringColumn.DEFAULT_VALUE
 
@@ -178,7 +178,7 @@ class StringColumn(column.Column):
         elif typecode == utils.type_code_boolean_column():
             values_true = {"true", "t", "1", "yes", "y", "on"}
             values_false = {"false", "f", "0", "no", "n", "off"}
-            vals = np.empty([self._values.shape[0]], dtype=np.bool)
+            vals = np.empty([self._values.shape[0]], dtype=bool)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     x = x.lower()
@@ -194,7 +194,7 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.BooleanColumn(values=vals)
         elif typecode == utils.type_code_binary_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = bytearray.fromhex(x)
@@ -203,7 +203,7 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.BinaryColumn(values=vals)
         elif typecode == utils.type_code_nullable_byte_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = int(np.int8(x))
@@ -212,7 +212,7 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableByteColumn(values=vals)
         elif typecode == utils.type_code_nullable_short_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = int(np.int16(x))
@@ -221,7 +221,7 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableShortColumn(values=vals)
         elif typecode == utils.type_code_nullable_int_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = int(np.int32(x))
@@ -230,7 +230,7 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableIntColumn(values=vals)
         elif typecode == utils.type_code_nullable_long_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = int(np.int64(x))
@@ -239,13 +239,13 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableLongColumn(values=vals)
         elif typecode == NullableStringColumn.TYPE_CODE:
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(vals):
                 vals[i] = x
 
             converted = NullableStringColumn(values=vals)
         elif typecode == utils.type_code_nullable_float_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = float(np.float32(x))
@@ -254,7 +254,7 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableFloatColumn(values=vals)
         elif typecode == utils.type_code_nullable_double_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = float(np.float64(x))
@@ -263,7 +263,7 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableDoubleColumn(values=vals)
         elif typecode == utils.type_code_nullable_char_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = ord(x[0])
@@ -274,7 +274,7 @@ class StringColumn(column.Column):
         elif typecode == utils.type_code_nullable_boolean_column():
             values_true = {"true", "t", "1", "yes", "y", "on"}
             values_false = {"false", "f", "0", "no", "n", "off"}
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     x = x.lower()
@@ -290,7 +290,7 @@ class StringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableBooleanColumn(values=vals)
         elif typecode == utils.type_code_nullable_binary_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = bytearray.fromhex(x)
@@ -307,7 +307,7 @@ class StringColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        return np.empty(size, dtype=np.object)
+        return np.empty(size, dtype=object)
 
 class NullableStringColumn(column.Column):
     """A Column holding nullable string values.
@@ -332,13 +332,13 @@ class NullableStringColumn(column.Column):
                 Must be a list or numpy array with dtype object, or an int
         """
         if values is None:
-            values = np.empty(0, dtype=np.object)
+            values = np.empty(0, dtype=object)
 
         if isinstance(values, list):
             for value in values:
                 self._check_type(value)
 
-            values = np.array(values, dtype=np.object)
+            values = np.array(values, dtype=object)
 
         elif isinstance(values, np.ndarray):
             if values.dtype != "object":
@@ -350,7 +350,7 @@ class NullableStringColumn(column.Column):
                 self._check_type(value)
 
         elif isinstance(values, int):
-            values = np.empty(values, dtype=np.object)
+            values = np.empty(values, dtype=object)
 
         else:
             raise dataframe.DataFrameException(
@@ -422,7 +422,7 @@ class NullableStringColumn(column.Column):
 
             converted = dataframe.DataFrame.LongColumn(values=vals)
         elif typecode == StringColumn.TYPE_CODE:
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x is not None:
                     vals[i] = str(x)
@@ -461,7 +461,7 @@ class NullableStringColumn(column.Column):
         elif typecode == utils.type_code_boolean_column():
             values_true = {"true", "t", "1", "yes", "y", "on"}
             values_false = {"false", "f", "0", "no", "n", "off"}
-            vals = np.empty([self._values.shape[0]], dtype=np.bool)
+            vals = np.empty([self._values.shape[0]], dtype=bool)
             for i, x in np.ndenumerate(self._values):
                 if x:
                     x = x.lower()
@@ -477,7 +477,7 @@ class NullableStringColumn(column.Column):
 
             converted = dataframe.DataFrame.BooleanColumn(values=vals)
         elif typecode == utils.type_code_binary_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x:
                     vals[i] = bytearray.fromhex(x)
@@ -486,25 +486,25 @@ class NullableStringColumn(column.Column):
 
             converted = dataframe.DataFrame.BinaryColumn(values=vals)
         elif typecode == utils.type_code_nullable_byte_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 vals[i] = int(np.int8(x)) if x is not None else None
 
             converted = dataframe.DataFrame.NullableByteColumn(values=vals)
         elif typecode == utils.type_code_nullable_short_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 vals[i] = int(np.int16(x)) if x is not None else None
 
             converted = dataframe.DataFrame.NullableShortColumn(values=vals)
         elif typecode == utils.type_code_nullable_int_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 vals[i] = int(np.int32(x)) if x is not None else None
 
             converted = dataframe.DataFrame.NullableIntColumn(values=vals)
         elif typecode == utils.type_code_nullable_long_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 vals[i] = int(np.int64(x)) if x is not None else None
 
@@ -512,7 +512,7 @@ class NullableStringColumn(column.Column):
         elif typecode == NullableStringColumn.TYPE_CODE:
             converted = self.clone()
         elif typecode == utils.type_code_nullable_float_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x:
                     vals[i] = float(np.float32(x))
@@ -521,7 +521,7 @@ class NullableStringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableFloatColumn(values=vals)
         elif typecode == utils.type_code_nullable_double_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x:
                     vals[i] = float(np.float64(x))
@@ -530,7 +530,7 @@ class NullableStringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableDoubleColumn(values=vals)
         elif typecode == utils.type_code_nullable_char_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x:
                     vals[i] = str(x)[0]
@@ -541,7 +541,7 @@ class NullableStringColumn(column.Column):
         elif typecode == utils.type_code_nullable_boolean_column():
             values_true = {"true", "t", "1", "yes", "y", "on"}
             values_false = {"false", "f", "0", "no", "n", "off"}
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x:
                     x = x.lower()
@@ -557,7 +557,7 @@ class NullableStringColumn(column.Column):
 
             converted = dataframe.DataFrame.NullableBooleanColumn(values=vals)
         elif typecode == utils.type_code_nullable_binary_column():
-            vals = np.empty([self._values.shape[0]], dtype=np.object)
+            vals = np.empty([self._values.shape[0]], dtype=object)
             for i, x in np.ndenumerate(self._values):
                 if x:
                     vals[i] = bytearray.fromhex(x)
@@ -574,4 +574,4 @@ class NullableStringColumn(column.Column):
         return converted
 
     def _create_array(self, size=0):
-        return np.empty(size, dtype=np.object)
+        return np.empty(size, dtype=object)

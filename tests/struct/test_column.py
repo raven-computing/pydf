@@ -257,7 +257,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_stringcolumn(self):
-        values = np.array(["AAA", "AAB", "AAC", "AAD", "AAE"], dtype=np.object)
+        values = np.array(["AAA", "AAB", "AAC", "AAD", "AAE"], dtype=object)
         col = StringColumn("colname", values)
         self.assertTrue(col.type_code() == StringColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "string")
@@ -315,7 +315,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_booleancolumn(self):
-        values = np.array([True, False, True, False, True], dtype=np.bool)
+        values = np.array([True, False, True, False, True], dtype=bool)
         col = BooleanColumn("colname", values)
         self.assertTrue(col.type_code() == BooleanColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "boolean")
@@ -358,7 +358,7 @@ class TestColumn(unittest.TestCase):
                            bytearray.fromhex("0202"),
                            bytearray.fromhex("0303ff"),
                            bytearray.fromhex("0404"),
-                           bytearray.fromhex("0505ff")], dtype=np.object)
+                           bytearray.fromhex("0505ff")], dtype=object)
 
         col = BinaryColumn("colname", values)
         self.assertTrue(col.type_code() == BinaryColumn.TYPE_CODE)
@@ -387,7 +387,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullablebytecolumn(self):
-        values = np.array([None, 22, 33, None, 55], dtype=np.object)
+        values = np.array([None, 22, 33, None, 55], dtype=object)
         col = NullableByteColumn("colname", values)
         self.assertTrue(col.type_code() == NullableByteColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "byte")
@@ -415,7 +415,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullableshortcolumn(self):
-        values = np.array([None, 22, 33, None, 55], dtype=np.object)
+        values = np.array([None, 22, 33, None, 55], dtype=object)
         col = NullableShortColumn("colname", values)
         self.assertTrue(col.type_code() == NullableShortColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "short")
@@ -443,7 +443,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullableintcolumn(self):
-        values = np.array([None, 22, None, 44, None], dtype=np.object)
+        values = np.array([None, 22, None, 44, None], dtype=object)
         col = NullableIntColumn("colname", values)
         self.assertTrue(col.type_code() == NullableIntColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "int")
@@ -471,7 +471,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullablelongcolumn(self):
-        values = np.array([None, 22, None, 44, None], dtype=np.object)
+        values = np.array([None, 22, None, 44, None], dtype=object)
         col = NullableLongColumn("colname", values)
         self.assertTrue(col.type_code() == NullableLongColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "long")
@@ -499,7 +499,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullablefloatcolumn(self):
-        values = np.array([11.1, None, 33.3, None, 55.5], dtype=np.object)
+        values = np.array([11.1, None, 33.3, None, 55.5], dtype=object)
         col = NullableFloatColumn("colname", values)
         self.assertTrue(col.type_code() == NullableFloatColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "float")
@@ -527,7 +527,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullabledoublecolumn(self):
-        values = np.array([11.1, None, 33.3, None, 55.5], dtype=np.object)
+        values = np.array([11.1, None, 33.3, None, 55.5], dtype=object)
         col = NullableDoubleColumn("colname", values)
         self.assertTrue(col.type_code() == NullableDoubleColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "double")
@@ -555,7 +555,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullablestringcolumn(self):
-        values = np.array([None, "AAB", "AAC", "AAD", None], dtype=np.object)
+        values = np.array([None, "AAB", "AAC", "AAD", None], dtype=object)
         col = NullableStringColumn("colname", values)
         self.assertTrue(col.type_code() == NullableStringColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "string")
@@ -583,7 +583,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullablecharcolumn(self):
-        values = np.array(["A", None, "C", None, "E"], dtype=np.object)
+        values = np.array(["A", None, "C", None, "E"], dtype=object)
         col = NullableCharColumn("colname", values)
         self.assertTrue(col.type_code() == NullableCharColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "char")
@@ -611,7 +611,7 @@ class TestColumn(unittest.TestCase):
         self.assertTrue(col.capacity() == 5)
 
     def test_construct_named_numpy_nullablebooleancolumn(self):
-        values = np.array([True, None, None, False, None], dtype=np.object)
+        values = np.array([True, None, None, False, None], dtype=object)
         col = NullableBooleanColumn("colname", values)
         self.assertTrue(col.type_code() == NullableBooleanColumn.TYPE_CODE)
         self.assertTrue(col.type_name() == "boolean")
@@ -654,7 +654,7 @@ class TestColumn(unittest.TestCase):
                            None,
                            bytearray.fromhex("0303ff"),
                            None,
-                           bytearray.fromhex("0505ff")], dtype=np.object)
+                           bytearray.fromhex("0505ff")], dtype=object)
 
         col = NullableBinaryColumn("colname", values)
         self.assertTrue(col.type_code() == NullableBinaryColumn.TYPE_CODE)

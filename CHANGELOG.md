@@ -1,3 +1,6 @@
+#### 1.1.4
+* Fixed some compatibility issues with more recent Numpy versions (since 1.24.0) where support for type aliases via the numpy namespace was removed, resulting in AttributeErrors.
+
 #### 1.1.3
 * Fixed erroneous setting of row items with \[\]-operator when the specified row index is out of bounds but within column capacity.
 * Fixed error resulting from inclusion of capacity buffer range in unique() method.

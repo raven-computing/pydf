@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Raven Computing
+# Copyright (C) 2023 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -666,7 +666,7 @@ def _deserialize_v2(buffer):
 
         #PAYLOAD
         for i in range(cols):
-            val = np.empty(rows, dtype=np.object)
+            val = np.empty(rows, dtype=object)
             if types[i] == bytecolumn.NullableByteColumn.TYPE_CODE:
                 for j in range(rows):
                     ptr += 1
@@ -864,7 +864,7 @@ def _deserialize_v2(buffer):
                 columns.append(longcolumn.LongColumn(names[i], val))
 
             elif types[i] == stringcolumn.StringColumn.TYPE_CODE:
-                val = np.empty(rows, dtype=np.object)
+                val = np.empty(rows, dtype=object)
                 for j in range(rows):
                     ptr += 1
                     c0 = ptr # marks the first character of each string
@@ -906,7 +906,7 @@ def _deserialize_v2(buffer):
                 columns.append(charcolumn.CharColumn(names[i], val))
 
             elif types[i] == booleancolumn.BooleanColumn.TYPE_CODE:
-                val = np.empty(rows, dtype=np.bool)
+                val = np.empty(rows, dtype=bool)
                 length = int(rows/8 if (rows%8 == 0) else ((rows/8) + 1))
                 ptr += 1 # focus on next readable position
                 bits = BitVector(buffer[ptr:ptr+length])
@@ -917,7 +917,7 @@ def _deserialize_v2(buffer):
                 columns.append(booleancolumn.BooleanColumn(names[i], val))
 
             elif types[i] == binarycolumn.BinaryColumn.TYPE_CODE:
-                val = np.empty(rows, dtype=np.object)
+                val = np.empty(rows, dtype=object)
                 for j in range(rows):
                     ptr += 1
                     length = int.from_bytes(buffer[ptr:ptr+4], byteorder="big", signed=False)

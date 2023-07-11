@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Raven Computing
+# Copyright (C) 2023 Raven Computing
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -290,7 +290,7 @@ def convert(df, target_type):
 
                 converted.add_column(longcolumn.LongColumn(col.get_name(), vals))
             elif tc == stringcolumn.NullableStringColumn.TYPE_CODE:
-                vals = np.array([None] * rows, dtype=np.object)
+                vals = np.array([None] * rows, dtype=object)
                 for i in range(rows):
                     val = col.get_value(i)
                     vals[i] = (stringcolumn.StringColumn.DEFAULT_VALUE
@@ -321,14 +321,14 @@ def convert(df, target_type):
 
                 converted.add_column(charcolumn.CharColumn(col.get_name(), vals))
             elif tc == booleancolumn.NullableBooleanColumn.TYPE_CODE:
-                vals = np.array([False] * rows, dtype=np.bool)
+                vals = np.array([False] * rows, dtype=bool)
                 for i in range(rows):
                     val = col.get_value(i)
                     vals[i] = False if val is None else val
 
                 converted.add_column(booleancolumn.BooleanColumn(col.get_name(), vals))
             elif tc == binarycolumn.NullableBinaryColumn.TYPE_CODE:
-                vals = np.array([None] * rows, dtype=np.object)
+                vals = np.array([None] * rows, dtype=object)
                 for i in range(rows):
                     val = col.get_value(i)
                     vals[i] = bytearray.fromhex("00") if val is None else val
@@ -343,7 +343,7 @@ def convert(df, target_type):
         converted = dataframe.NullableDataFrame()
         for col in df:
             tc = col.type_code()
-            vals = np.array([None] * rows, dtype=np.object)
+            vals = np.array([None] * rows, dtype=object)
             for i in range(rows):
                 vals[i] = col.get_value(i)
 
